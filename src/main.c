@@ -1,7 +1,7 @@
 /****************************************************************//**
  * \file  main.c
  *
- * \brief  シバンからインタプリタ名を取得する
+ * \brief  引数で与えられたスクリプトパスのシバンをチェックしてインタプリタ名を出力する
  *
  * - get_shebang_interpreter というコマンドとしてビルド
  *   - EmEditorの外部コマンド「exec_script.sh」などで使用している
@@ -32,6 +32,7 @@ int main( int argc, char *argv[] )
     int ret_val = 0;
     static char buff[ BUFF_SIZE ];
 
+    //! ### 処理フロー
     //! - 1. 引数の数だけループ
     if( argc > 1 ){
         for( int idx=1; idx<argc; idx++ ){

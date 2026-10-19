@@ -7,6 +7,10 @@
 - xxx
 
 
+## [0.0.4] - 2026-10-20
+### Changed
+- Enabled coverage measurement for Clang environments.
+
 ## [0.0.3] - 2026-10-19
 ### Added
 - Added a workflow to generate "GitHub Pages".

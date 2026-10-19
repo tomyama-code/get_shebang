@@ -11,6 +11,10 @@
   - `config.h`はMSVC環境で作成したものを用いる
     - 正しい情報は、`plugin_select_config_from_shebang/collect_file.sh` を参照
 
+## ドキュメント
+
+- [https://tomyama-code.github.io/get_shebang/](https://tomyama-code.github.io/get_shebang/)
+
 ## 構成
 
 - CMakeを使用している
@@ -30,7 +34,9 @@
 - 作成したディレクトリに移動してCMakeを実行する（各環境用のスクリプトを用意している）
 - 上記手順を投入コマンドレベルで書き直すと次のようになる
 
-#### [Cygwin, CentOS, FreeBSD, Android Termux の場合]
+#### 対象環境
+- Cygwin, CentOS (GNU環境)
+- FreeBSD, Android Termux Clang環境
 
 ```sh
 ./build/create_arch_dir.pl
@@ -38,8 +44,9 @@ cd "build/*環境用ディレクトリ*"
 ../build_unix.sh
 ```
 
-#### [Microsoft Visual Studio (MSVC) の場合]
-- 「Visual Studio 開発者コマンドプロンプト」で実行
+#### 対象環境
+- Microsoft Visual Studio MSVC環境
+  - 「Visual Studio 開発者コマンドプロンプト」で実行
 
 ```bat
 perl build/create_arch_dir.pl
@@ -50,13 +57,16 @@ cd "build/*環境用ディレクトリ*"
 ### 各環境用のビルドスクリプトについて
 
 - スクリプトにしているが、特殊な手順はなくて通常のCMakeの作法通り（のはず）
-- コードカバレッジの計測は（現時点では）GNU環境のみ実施するようになっている
+- コードカバレッジの計測は（現時点では）GNU環境とClang環境で実施するようになっている
 
 ### その他の手順
 
 #### `get_shebang_interpreter`のインストール
 
-##### [Cygwin, CentOS, FreeBSD, Android Termux の場合]
+##### 対象環境
+- Cygwin, CentOS (GNU環境)
+- FreeBSD, Android Termux Clang環境
+
 - `build/*環境用ディレクトリ*`に移動してMakefileを使用
 
 ```sh
@@ -64,7 +74,10 @@ cd "build/*環境用ディレクトリ*"
 make install
 ```
 
-##### [Microsoft Visual Studio (MSVC) の場合]
+##### 対象環境
+- Microsoft Visual Studio MSVC環境
+  - 「Visual Studio 開発者コマンドプロンプト」で実行
+
 - `build/*環境用ディレクトリ*`に移動してCMakeを使用
   - 手順的には下記のようになるはずだが、インストールしても使わないだろうから試していない（Cygwinでインストールしておけば充分）
     - 上記の理由で、インストール先（`CMAKE_INSTALL_PREFIX`）もデフォルトのまま変更していない（恐らく `%ProgramFiles%`, もしくは `%ProgramFiles(x86)%` のまま）

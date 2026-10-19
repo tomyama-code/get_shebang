@@ -1,11 +1,11 @@
 #!/bin/sh
 ################################################################################
-## - $Revision: 1.2 $
+## - $Revision: 1.5 $
 ################################################################################
 
 sh_exec()
 {
-    echo -e "\n[34m$ [0m$@"
+    my_echo "\n[34m$ [0m$@"
     "$@"
     exit_status=$?
     echo "exit_status=$exit_status"
@@ -13,6 +13,41 @@ sh_exec()
         exit 1
     fi
     return $exit_status
+}
+
+## Support for environments where the -e option of the echo command does not work.
+my_echo()
+{
+    #perl -e 'print( @ARGV )' "$@"
+
+    perl -e '
+        my %escapes = (
+            q{n} => "\n",   # 改行
+            q{t} => "\t",   # 水平タブ
+            q{r} => "\\r",   # 復帰
+            q{f} => "\\f",   # 改ページ
+            q{a} => "\\a",   # 警報音
+            q{e} => "\\e",   # ESC
+        );
+
+        my @args = @ARGV;
+
+        my $argc = scalar( @args );
+        if( ( $argc > 0 ) && ( $args[ 0 ] eq q{-e} ) ){
+            $argc--;
+            shift( @args );
+        }else{
+            $args[ $argc - 1 ] .= "\n";
+        }
+        for( my $idx=0; $idx<$argc; $idx++ ){
+            #print( qq{\$args[ $idx ] = "$args[ $idx ]"\n} );
+        #    $args[ $idx ] =~ s/\\n/\n/go;
+        #    $args[ $idx ] =~ s/\\a/\a/go;
+            $args[ $idx ] =~ s/\\([ntrfae])/$escapes{ $1 }/go;
+            #print( qq{\$args[ $idx ] = "$args[ $idx ]"\n} );
+        }
+        print( join( q{ }, @args ) );
+    ' "$@"
 }
 
 if [ "$TERMUX_VERSION" != '' ]; then
@@ -24,6 +59,21 @@ sh_exec make
 sh_exec make test
 if [ -f "./src/CMakeFiles/get_shebang_ut_obj.dir/get_shebang.c.gcda" ]; then
     sh_exec lcov --capture --directory ./src/CMakeFiles/get_shebang_ut_obj.dir --output-file coverage.info
+    # cov ディレクトリにHTMLレポートを出力
     sh_exec genhtml coverage.info --output-directory cov
+elif [ -f "./default.profraw" ]; then
+    sh_exec llvm-profdata merge -sparse default.profraw -o default.profdata
+    sh_exec llvm-cov report ./test/get_shebang_test -instr-profile=default.profdata
+    # cov_llvm ディレクトリにHTMLレポートを出力
+    sh_exec llvm-cov show ./test/get_shebang_test -instr-profile=default.profdata -format=html -output-dir=cov_llvm
+
+    which genhtml >/dev/null 2>&1
+    genhtml_is_not_available=$?
+    if [ $genhtml_is_not_available -eq 0 ]; then
+        # lcov が理解できる「coverage.info」ファイルに変換
+        llvm-cov export ./test/get_shebang_test -instr-profile=default.profdata -format=lcov > coverage.info
+        # cov ディレクトリにHTMLレポートを出力
+        sh_exec genhtml coverage.info --output-directory cov
+    fi
 fi
 sh_exec ../create_archive.pl

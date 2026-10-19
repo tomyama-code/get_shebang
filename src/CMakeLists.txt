@@ -7,7 +7,11 @@ add_library(get_shebang_ut_obj OBJECT get_shebang.c)
 if(ENABLE_COVERAGE)
     message(STATUS "Coverage is enabled in subdirectory!")
     # サブディレクトリ内のターゲットにフラグを適用
-    target_compile_options(get_shebang_ut_obj PRIVATE --coverage -g -O0)
+    if(IS_GNU)
+        target_compile_options(get_shebang_ut_obj PRIVATE --coverage -g -O0)
+    elseif(IS_CLANG)
+        target_compile_options(get_shebang_ut_obj PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+    endif()
 endif()
 
 # get_shebang_objターゲットに対して、config.h が生成されるディレクトリをインクルードパスに追加

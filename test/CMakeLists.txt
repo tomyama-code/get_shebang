@@ -25,8 +25,12 @@ target_link_libraries(get_shebang_test PRIVATE Threads::Threads)
 
 if(ENABLE_COVERAGE)
     message(STATUS "Coverage is enabled in subdirectory!")
-    # 明示的に gcov ライブラリをリンクする
-    target_link_libraries(get_shebang_test PRIVATE gcov)
-    # サブディレクトリ内のターゲットにフラグを適用
-    target_link_options(get_shebang_test PRIVATE --coverage)
+    if(IS_GNU)
+        # 明示的に gcov ライブラリをリンクする
+        target_link_libraries(get_shebang_test PRIVATE gcov)
+        # サブディレクトリ内のターゲットにフラグを適用
+        target_link_options(get_shebang_test PRIVATE --coverage)
+    elseif(IS_CLANG)
+        target_link_options(get_shebang_test PRIVATE -fprofile-instr-generate)
+    endif()
 endif()

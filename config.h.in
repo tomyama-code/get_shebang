@@ -12,6 +12,11 @@
 /* Name of package */
 #cmakedefine PACKAGE
 
+#cmakedefine IS_MSVC
+#cmakedefine IS_GNU
+#cmakedefine IS_CLANG
+#cmakedefine UNKNOWN_DEV_ENV
+
 #define NO_USE_GET_VERSION
 
 /* システムに特定のヘッダーがあるかどうかのフラグ */

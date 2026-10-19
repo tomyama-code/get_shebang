@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(get_shebang VERSION 0.0.3 LANGUAGES C)
+project(get_shebang VERSION 0.0.4 LANGUAGES C)
 
 # 依存オプション用のモジュールを読み込む
 include(CMakeDependentOption)
@@ -7,9 +7,24 @@ include(CMakeDependentOption)
 # Termux環境かどうかの判定フラグを設定
 if(DEFINED ENV{TERMUX_VERSION} OR CMAKE_SUBSYSTEM MATCHES "termux")
     set(IS_TERMUX TRUE)
+    message(STATUS "IS_TERMUX is ON !")
 endif()
 
 if(MSVC)
+    set(IS_MSVC TRUE)
+    message(STATUS "IS_MSVC is ON !")
+elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "GNU")
+    set(IS_GNU TRUE)
+    message(STATUS "IS_GNU is ON !")
+elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set(IS_CLANG TRUE)
+    message(STATUS "IS_CLANG is ON !")
+else()
+    set(UNKNOWN_DEV_ENV TRUE)
+    message(STATUS "UNKNOWN DEVELOPMENT ENVIRONMENT !")
+endif()
+
+if(IS_MSVC)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 endif()
@@ -18,14 +33,19 @@ endif()
 # 消したい時: cmake -U USE_COVERAGE .
 option(USE_COVERAGE "Coverage measurement" ON)
 
+set(ALLOW_COVERAGE_COMPILER OFF)
+if(IS_GNU OR IS_CLANG)
+    set(ALLOW_COVERAGE_COMPILER ON)
+endif()
+
 # 条件付きオプションを定義
 # 書式: cmake_dependent_option(変数名 "説明文" デフォルト値 "有効になる条件" 無効時の値)
 cmake_dependent_option(
     ENABLE_COVERAGE
     "Enable coverage reporting"
     ON
-    "USE_COVERAGE;CMAKE_COMPILER_IS_GNUCC" # GNU(GCC)かつUSE_COVERAGEがONの時だけ有効
-    OFF                                    # 条件を満たさない時は強制的にOFF（キャッシュにも残らない）
+    "USE_COVERAGE;ALLOW_COVERAGE_COMPILER"  # ONの条件
+    OFF                                     # 条件を満たさない時は強制的にOFF（キャッシュにも残らない）
 )
 
 # システムのヘッダーファイル確認モジュールを読み込む
