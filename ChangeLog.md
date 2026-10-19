@@ -3,7 +3,17 @@
 ## [Unreleased]
 ### Added
 - xxx
+### Changed
+- xxx
 
+
+## [0.0.2] - 2026-10-19
+### Changed
+- I forgot to grant execution permissions, so I’ve fixed that.
+  - `build/build_unix.sh`
+  - `build/collect_file.sh`
+  - `build/create_arch_dir.pl`
+  - `build/create_archive.pl`
 
 ## [0.0.1] - 2026-10-19
 ### Added
