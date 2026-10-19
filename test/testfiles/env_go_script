@@ -1,0 +1,10 @@
+#!/usr/bin/env gorun
+
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("gorunで実行中")
+}
+

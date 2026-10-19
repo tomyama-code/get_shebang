@@ -1,0 +1,38 @@
+/* config.h.in */
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+/* バージョン情報の埋め込み */
+#define PROJECT_VERSION "@PROJECT_VERSION@"
+
+/* Name of project */
+#cmakedefine PROJECT_NAME "@PROJECT_NAME@"
+
+/* Name of package */
+#cmakedefine PACKAGE
+
+#define NO_USE_GET_VERSION
+
+/* システムに特定のヘッダーがあるかどうかのフラグ */
+#cmakedefine HAVE_UNISTD_H
+
+/* 有効化された機能のフラグ */
+#cmakedefine ENABLE_DEBUG
+
+/* strncpy_s が利用可能か */
+#cmakedefine HAVE_STRNCPY_S
+
+/* fopen_s が利用可能か */
+#cmakedefine HAVE_FOPEN_S
+
+/* strerror_s が利用可能か */
+#cmakedefine HAVE_STRERROR_S
+
+/* sprintf_s が利用可能か */
+#cmakedefine HAVE_SPRINTF_S
+
+/* vsprintf_s が利用可能か */
+#cmakedefine HAVE_VSPRINTF_S
+
+#endif /* CONFIG_H */

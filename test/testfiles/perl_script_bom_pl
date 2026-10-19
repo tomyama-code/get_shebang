@@ -1,0 +1,4 @@
+﻿#!/usr/bin/perl -w
+
+# 日本語のコメント
+print( qq{ok\n} );

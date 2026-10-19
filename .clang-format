@@ -1,0 +1,41 @@
+# ベースは Allmanスタイルに近いもの を選択
+BasedOnStyle: WebKit
+
+# 波括弧の改行位置をカスタムに設定
+BreakBeforeBraces: Custom
+BraceWrapping:
+  # 関数定義の波括弧は次の行に送る
+  AfterFunction: true
+
+  # 制御構文（if/else/for/while/switch等）の波括弧は同じ行にする
+  AfterControlStatement: false
+
+  # else や catch などのキーワードを波括弧と同じ行に保つ（※お好みで）
+  BeforeElse: false
+
+# 丸括弧のスペース制御
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  # if, for, while などの制御構文の後はスペースを空けない -> if(argc > 1)
+#  AfterControlStatements: false
+
+  # 関数定義の括弧の前はスペースを空けない -> main(int argc, ...)
+  AfterFunctionDefinitionName: false
+
+# 丸括弧 () の内側にスペースを入れる
+SpacesInParentheses: true
+
+# 引数がない空の括弧 () の中にはスペースを入れない (例: main(void) 等)
+# ※もし空の括弧にも入れたい場合は true に
+SpaceInEmptyParentheses: false
+
+# インデントの幅（スペース4つ）
+IndentWidth: 4
+
+# ポインタの記号（*）の寄せ方
+# Left  -> char* argv[]
+# Right -> char *argv[]
+PointerAlignment: Right
+
+# 参照（&）やポインタ（*）の周りのスペースを綺麗に配置する
+DerivePointerAlignment: false
