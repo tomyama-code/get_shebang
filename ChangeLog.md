@@ -7,6 +7,11 @@
 - xxx
 
 
+## [0.0.3] - 2026-10-19
+### Added
+- Added a workflow to generate "GitHub Pages".
+  - `.github/workflows/doxygen.yml`
+
 ## [0.0.2] - 2026-10-19
 ### Changed
 - I forgot to grant execution permissions, so I’ve fixed that.

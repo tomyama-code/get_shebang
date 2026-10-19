@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(get_shebang VERSION 0.0.2 LANGUAGES C)
+project(get_shebang VERSION 0.0.3 LANGUAGES C)
 
 # 依存オプション用のモジュールを読み込む
 include(CMakeDependentOption)

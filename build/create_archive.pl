@@ -1,13 +1,13 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.8 $
+## - $Revision: 1.10 $
 ################################################################################
 
 use strict;                         # first released with perl 5
 use warnings;                       # first released with perl v5.6.0
+use Cwd qw();                       # first released with perl 5
 use File::Basename qw();            # first released with perl 5
 use File::Path qw();                # first released with perl 5.001
-use Cwd qw();                       # first released with perl 5
 use Getopt::Long qw();              # first released with perl 5
 
 
@@ -27,6 +27,7 @@ sub pl_main( @ )
 
     my @file_list = (
         'get_shebang/.clang-format',
+        'get_shebang/.github/workflows/doxygen.yml',
         'get_shebang/.gitignore',
         'get_shebang/build/build_msvc.bat',
         'get_shebang/build/build_unix.sh',
@@ -115,8 +116,9 @@ sub pl_main( @ )
         mkdir( 'archive' );
     }
 
-    my $archive_file_path = Cwd::abs_path(
-        "$main::apppath/../archive/$archive_file_name" );
+    # Cwd::abs_path() は存在するパスしか最適化できない
+    my $archive_path = Cwd::abs_path( "$main::apppath/../archive" );
+    my $archive_file_path = "$archive_path/$archive_file_name";
 
     chdir( "$main::apppath/../.." );
 
