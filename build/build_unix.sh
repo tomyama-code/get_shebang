@@ -1,6 +1,6 @@
 #!/bin/sh
 ################################################################################
-## - $Revision: 1.5 $
+## - $Revision: 1.11 $
 ################################################################################
 
 sh_exec()
@@ -50,11 +50,42 @@ my_echo()
     ' "$@"
 }
 
+errp()
+{
+    echo "$@" 1>&2
+}
+
+execution_dir="`pwd`"
+builddir="`dirname \"$execution_dir\"`"
+if [ "`basename \"$builddir\"`" != 'build' ]; then
+    errp 'error: It must be executed from within "build/*".'
+    errp ''
+    errp 'If the "build/*" directory does not exist, please first run "perl create_arch_dir.pl".'
+    errp ' or'
+    errp 'The directory name can be anything, so you can also use the following command: "mkdir aaa && cd aaa".'
+    exit 1
+fi
+workdir="$execution_dir"
+projdir="`dirname \"$builddir\"`"
+workdirname="`basename \"$workdir\"`"
+
+has_pending_changes=0
+if [ -d "$projdir/.git" ]; then
+    git diff --exit-code "$projdir" >/dev/null
+    has_pending_changes=$?
+    if [ $has_pending_changes -ne 0 ]; then
+        echo "Modified from the repository !"
+    fi
+else
+    echo "Not a Git clone directory !"
+fi
+
 if [ "$TERMUX_VERSION" != '' ]; then
     cmake_opts='-DCMAKE_INSTALL_PREFIX=/data/data/com.termux/files/usr/local'
 fi
 
 sh_exec cmake $cmake_opts ../..
+sh_exec ../parse_config_h.pl
 sh_exec make
 sh_exec make test
 if [ -f "./src/CMakeFiles/get_shebang_ut_obj.dir/get_shebang.c.gcda" ]; then
@@ -68,8 +99,8 @@ elif [ -f "./default.profraw" ]; then
     sh_exec llvm-cov show ./test/get_shebang_test -instr-profile=default.profdata -format=html -output-dir=cov_llvm
 
     which genhtml >/dev/null 2>&1
-    genhtml_is_not_available=$?
-    if [ $genhtml_is_not_available -eq 0 ]; then
+    genhtml_missing=$?
+    if [ $genhtml_missing -eq 0 ]; then
         # lcov が理解できる「coverage.info」ファイルに変換
         llvm-cov export ./test/get_shebang_test -instr-profile=default.profdata -format=lcov > coverage.info
         # cov ディレクトリにHTMLレポートを出力
@@ -77,3 +108,7 @@ elif [ -f "./default.profraw" ]; then
     fi
 fi
 sh_exec ../create_archive.pl
+workdir_archive="$builddir/$workdirname.tar.gz"
+#echo "\$workdir_archive=\"$workdir_archive\""
+sh_exec cd ..
+sh_exec tar czf "$workdir_archive" "$workdirname/"

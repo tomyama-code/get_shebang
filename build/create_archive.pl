@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.10 $
+## - $Revision: 1.11 $
 ################################################################################
 
 use strict;                         # first released with perl 5
@@ -25,64 +25,13 @@ sub pl_main( @ )
 
     param_print();
 
-    my @file_list = (
-        'get_shebang/.clang-format',
-        'get_shebang/.github/workflows/doxygen.yml',
-        'get_shebang/.gitignore',
-        'get_shebang/build/build_msvc.bat',
-        'get_shebang/build/build_unix.sh',
-        'get_shebang/build/CMakeLists.txt',
-        'get_shebang/build/collect_file.sh',
-        'get_shebang/build/create_arch_dir.pl',
-        'get_shebang/build/create_archive.pl',
-        'get_shebang/ChangeLog.md',
-        'get_shebang/CMakeLists.txt',
-        'get_shebang/config.h.in',
-        'get_shebang/Doxyfile',
-        'get_shebang/include/get_shebang.h',
-        'get_shebang/LICENSE',
-        'get_shebang/README.md',
-        'get_shebang/src/CMakeLists.txt',
-        'get_shebang/src/get_shebang.c',
-        'get_shebang/src/main.c',
-        'get_shebang/test/CMakeLists.txt',
-        'get_shebang/test/testcase_shebang_function.c',
-        'get_shebang/test/testfiles/broken_shebang',
-        'get_shebang/test/testfiles/broken_shebang_2',
-        'get_shebang/test/testfiles/env_go_script',
-        'get_shebang/test/testfiles/env_java_11',
-        'get_shebang/test/testfiles/env_java_25',
-        'get_shebang/test/testfiles/env_perl_pl',
-        'get_shebang/test/testfiles/env_python2_py',
-        'get_shebang/test/testfiles/env_python3_py',
-        'get_shebang/test/testfiles/env_python_py',
-        'get_shebang/test/testfiles/perl_script_bom_pl',
-        'get_shebang/test/testfiles/perl_script_crlf_pl',
-        'get_shebang/test/testfiles/perl_script_cr_pl',
-        'get_shebang/test/testfiles/perl_script_pl',
-        'get_shebang/test/testfiles/perl_script_utf16be_bom_pl',
-        'get_shebang/test/testfiles/perl_script_utf16le_bom_pl',
-        'get_shebang/test/testfiles/perl_script_utf32be_bom_pl',
-        'get_shebang/test/testfiles/perl_script_utf32le_bom_pl',
-        'get_shebang/test/testfiles/shell_script_bash',
-        'get_shebang/test/testfiles/shell_script_sh',
-        'get_shebang/test/testfiles/text_txt',
-        'get_shebang/test/tmym_common.c',
-        'get_shebang/test/tmym_common.h',
-        'get_shebang/test/unit_test.c',
-        'get_shebang/test/unit_test.h',
-        'get_shebang/test/unit_test_user_define.c',
-        'get_shebang/test/unit_test_user_define.h',
-    );
-
     chdir( "$main::apppath/.." );
 
     open( CMAKELISTS, '<', 'CMakeLists.txt' ) ||
         die( qq{'CMakeLists.txt': could not open file: $!} );
     my $proj_name = '';
     my $proj_ver  = '';
-    while( <CMAKELISTS> ){
-        my $line = $_;
+    while( my $line = <CMAKELISTS> ){
         $line =~ s/\r?\n$//go;
         #print( qq{L: $line\n} );
 
@@ -111,6 +60,27 @@ sub pl_main( @ )
     $archive_file_name .= "-$proj_ver" if( $proj_ver ne '' );
     $archive_file_name .= ".tar.gz";
     print( qq{\$archive_file_name="$archive_file_name"\n} );
+
+    my @file_list = ();
+    open( FILELILST, '<', 'FileList.txt' ) ||
+        die( qq{'FileList.txt': could not open file: $!} );
+    my $nr = 0;
+    while( my $line = <FILELILST> ){
+        $nr++;
+        $line =~ s/\r?\n$//go;
+        #print( qq{L: $line\n} );
+
+        $line =~ s/#.*//o;          # コメント（#以降）を削除
+        $line =~ s/^\s+|\s+$//go;   # 前後の空白を削除
+        next if( $line eq '' );     # 空行はスキップ
+
+        if( ! -f $line ){
+            die( qq{error: FileList.txt: $nr: $line: File not found.\n} );
+        }
+
+        push( @file_list, "$proj_name/$line" );
+    }
+    close( FILELILST );
 
     if( ! -d 'archive' ){
         mkdir( 'archive' );

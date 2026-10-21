@@ -1,11 +1,12 @@
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: - $Revision: 1.1 $
+:: - $Revision: 1.2 $
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 @echo off
 setlocal enabledelayedexpansion
 
 :: メイン処理（コマンドを関数に丸投げするだけ）
 call :sh_exec cmake ../..
+call :sh_exec perl ../parse_config_h.pl
 call :sh_exec cmake --build . --config Release
 call :sh_exec ctest -C Release
 

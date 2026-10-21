@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.5 $
+## - $Revision: 1.9 $
 ################################################################################
 
 use strict;                         # first released with perl 5
@@ -52,9 +52,12 @@ sub pl_main( @ )
 
     my $osname = $host_info{OS_NAME};
     $osname = $host_info{DISTRIB_PRETTY_NAME} if( $host_info{DISTRIB_PRETTY_NAME} ne "" );
-    my $arch_dir = "$host_info{OS_PLATFORM}_${osname}_$host_info{HOSTNAME}_$host_info{COMPILER_ID}";
+    my $target_arch = '';
+    $target_arch = "_x86" if( defined( $ENV{VSCMD_ARG_TGT_ARCH} ) && $ENV{VSCMD_ARG_TGT_ARCH} eq 'x86' );
+    my $arch_dir = "$host_info{OS_PLATFORM}_${osname}_$host_info{HOSTNAME}_$host_info{COMPILER_ID}$target_arch";
     #print( qq{D: "$arch_dir"\n} );
     # D: "AMD64_Windows_DESKTOP-I0VU1AC_MSVC"
+    # D: "AMD64_Windows_DESKTOP-I0VU1AC_MSVC_x86"
     # D: "x86_64_CYGWIN_NT-10.0-19045_DESKTOP-I0VU1AC_GNU"
     # D: "x86_64_CentOS_Stream_9_pug_GNU"
     # D: "amd64_FreeBSD_15.1-RELEASE-p3_bull_Clang"
@@ -62,7 +65,9 @@ sub pl_main( @ )
 
     if( ! -d $arch_dir ){
         mkdir( $arch_dir );
-        print( qq{"$arch_dir": create directory\n} );
+        print( qq{"$arch_dir": Create a directory.\n} );
+    }else{
+        print( qq{"$arch_dir": The directory already existed.\n} );
     }
 
     chdir( $main::execution_dir );
@@ -92,11 +97,13 @@ sub init_script()
 sub param_print()
 {
     dPrintf( qq{Parameter Print\n} .
+             qq{     \$main::execution_dir = "%s"\n} .
              qq{     \$main::apppath = "%s"\n} .
              qq{     \$main::appname = "%s"\n} .
              qq{     \$main::argc = %d\n} .
              qq{     \@main::argv = (%s)\n} .
              qq{     \$main::debug = %d\n},
+        $main::execution_dir,
         $main::apppath,
         $main::appname,
         $main::argc,

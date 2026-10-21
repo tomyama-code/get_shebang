@@ -30,12 +30,15 @@ jobs:
           sudo apt-get install -y doxygen graphviz
 
       - name: Run Doxygen
-        run: doxygen Doxyfile
+        run: |
+          doxygen Doxyfile
+          mv ./doc ./_site
+          mv ./_site/html ./_site/doc
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './doc/html'
+          path: './_site'
 
       - name: Deploy to GitHub Pages
         id: deployment

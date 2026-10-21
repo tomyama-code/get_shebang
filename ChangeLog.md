@@ -7,6 +7,14 @@
 - xxx
 
 
+## [0.0.5] - 2026-10-21
+### Added
+- `build/parse_config_h.pl`
+  - A script to convert "config.h" for use in Perl and shell scripts.
+
+### Changed
+- Updated the various procedure scripts located in the `build` directory.
+
 ## [0.0.4] - 2026-10-20
 ### Changed
 - Enabled coverage measurement for Clang environments.

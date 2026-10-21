@@ -11,15 +11,22 @@
   - `config.h`はMSVC環境で作成したものを用いる
     - 正しい情報は、`plugin_select_config_from_shebang/collect_file.sh` を参照
 
-## ドキュメント
+## サイト
 
-- [https://tomyama-code.github.io/get_shebang/](https://tomyama-code.github.io/get_shebang/)
+- プロジェクト
+  - [https://github.com/tomyama-code/get_shebang](https://github.com/tomyama-code/get_shebang)
+- ドキュメント
+  - [https://tomyama-code.github.io/get_shebang/doc/](https://tomyama-code.github.io/get_shebang/doc/)
 
 ## 構成
 
 - CMakeを使用している
 
-### 事前準備
+* * *
+
+### ビルド方法
+
+#### 事前準備
 
 - 他プロジェクトから流用しているソースファイルをかき集める（スクリプトを実行）
 
@@ -27,37 +34,41 @@
 ./build/collect_file.sh
 ```
 
-### ビルドの手順
+#### ビルド手順
 
 - `build`配下に環境用のディレクトリを作成する
   - ディレクトリ名を決めるのが面倒であれば、`./build/create_arch_dir.pl` を実行する
 - 作成したディレクトリに移動してCMakeを実行する（各環境用のスクリプトを用意している）
 - 上記手順を投入コマンドレベルで書き直すと次のようになる
 
-#### 対象環境
+##### 対象環境
 - Cygwin, CentOS (GNU環境)
-- FreeBSD, Android Termux Clang環境
+- FreeBSD, Android Termux (Clang環境)
 
+##### 手順
 ```sh
 ./build/create_arch_dir.pl
 cd "build/*環境用ディレクトリ*"
 ../build_unix.sh
 ```
 
-#### 対象環境
+##### 対象環境
 - Microsoft Visual Studio MSVC環境
   - 「Visual Studio 開発者コマンドプロンプト」で実行
 
+##### 手順
 ```bat
 perl build/create_arch_dir.pl
 cd "build/*環境用ディレクトリ*"
 ..\build_msvc.bat
 ```
 
-### 各環境用のビルドスクリプトについて
+##### 各環境用のビルドスクリプトについて
 
 - スクリプトにしているが、特殊な手順はなくて通常のCMakeの作法通り（のはず）
 - コードカバレッジの計測は（現時点では）GNU環境とClang環境で実施するようになっている
+
+* * *
 
 ### その他の手順
 
@@ -65,8 +76,9 @@ cd "build/*環境用ディレクトリ*"
 
 ##### 対象環境
 - Cygwin, CentOS (GNU環境)
-- FreeBSD, Android Termux Clang環境
+- FreeBSD, Android Termux (Clang環境)
 
+##### 手順
 - `build/*環境用ディレクトリ*`に移動してMakefileを使用
 
 ```sh
@@ -78,6 +90,7 @@ make install
 - Microsoft Visual Studio MSVC環境
   - 「Visual Studio 開発者コマンドプロンプト」で実行
 
+##### 手順
 - `build/*環境用ディレクトリ*`に移動してCMakeを使用
   - 手順的には下記のようになるはずだが、インストールしても使わないだろうから試していない（Cygwinでインストールしておけば充分）
     - 上記の理由で、インストール先（`CMAKE_INSTALL_PREFIX`）もデフォルトのまま変更していない（恐らく `%ProgramFiles%`, もしくは `%ProgramFiles(x86)%` のまま）
@@ -88,6 +101,8 @@ cd "build/*環境用ディレクトリ*"
 cmake --install . --config Release
 ```
 
+
+* * *
 
 
 以上
