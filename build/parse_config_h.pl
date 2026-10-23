@@ -1,8 +1,9 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.1 $
+## - $Revision: 1.4 $
 ################################################################################
 
+package parse_config_h;
 use strict;                         # first released with perl 5
 use warnings;                       # first released with perl v5.6.0
 use Cwd qw();                       # first released with perl 5
@@ -15,10 +16,6 @@ use Getopt::Long qw();              # first released with perl 5
 ## スクリプトのエントリポイント
 sub pl_main( @ )
 {
-    if( ! -f './config.h' ){
-        die( qq{Please run this in the directory that contains "config.h".\n} );
-    }
-
     ## 初期化処理
     init_script();
 
@@ -27,8 +24,7 @@ sub pl_main( @ )
 
     param_print();
 
-    print( qq{config_h_to_ini() >config.ini\n} );
-    config_h_to_ini( "$main::execution_dir/config.h" );
+    config_h_to_ini( $main::input_config_h, $main::output_config_ini );
 
     return 0;
 }
@@ -47,6 +43,8 @@ sub init_script()
     $main::argc = 0;
     @main::argv = ();
     $main::debug = 0;
+    $main::input_config_h = undef;
+    $main::output_config_ini = undef;
     ##############
 }
 sub param_print()
@@ -57,13 +55,17 @@ sub param_print()
              qq{     \$main::appname = "%s"\n} .
              qq{     \$main::argc = %d\n} .
              qq{     \@main::argv = (%s)\n} .
-             qq{     \$main::debug = %d\n},
+             qq{     \$main::debug = %d\n} .
+             qq{     \$main::input_config_h = "%s"\n} .
+             qq{     \$main::output_config_ini = "%s"\n},
         $main::execution_dir,
         $main::apppath,
         $main::appname,
         $main::argc,
         array_to_str( ', ', @main::argv ),
-        $main::debug );
+        $main::debug,
+        $main::input_config_h,
+        $main::output_config_ini );
 }
 
 sub array_to_str( $@ )
@@ -92,7 +94,27 @@ sub parse_arg( @ )
 
     Getopt::Long::GetOptions(
         'debug|d'         => \$main::debug,
+        'input|i=s'       => \$main::input_config_h,
+        'output|o=s'      => \$main::output_config_ini,
     ) || die( qq{parse_arg(): error: Failed to parse option switches.\n} );
+
+    for my $arg( @ARGV ){
+        die( qq{"$arg": unknown option\n} );
+    }
+
+    my $config_h = "$main::execution_dir/config.h";
+    $main::input_config_h = $config_h if( !defined( $main::input_config_h ) );
+
+    if( ! -f $main::input_config_h ){
+        my $msg = "error: File not found: $main::input_config_h\n" .
+            qq{Please run this in the directory containing "config.h".\n} .
+            qq{Alternatively, specify the path using the "--input" or "-i" option.\n};
+        die( $msg );
+    }
+
+    my $inifile = $main::input_config_h;
+    $inifile =~ s/\.h$/.ini/o;
+    $main::output_config_ini = $inifile if( !defined( $main::output_config_ini ) );
 }
 
 #sub dPrint( @ )
@@ -139,30 +161,30 @@ sub isUpdateNecessary( $$ )
     }
 }
 
-sub config_h_to_ini( $ )
+sub config_h_to_ini( $$ )
 {
-    my( $config_h ) = @_;
-    my $conf = parse_config_h( $config_h );
-    #print( Data::Dumper::Dumper( $conf ) );
+    my( $config_h, $inifile ) = @_;
 
-    my $inifile = $config_h;
-    $inifile =~ s/\.h$/.ini/o;
-    #print( qq{\$inifile="$inifile"\n} );
+    my $inifile_bname = File::Basename::basename( $inifile );
+    print( qq{config_h_to_ini() >$inifile_bname\n} );
+
+    my $ref_config_h = parse_config_h( $config_h );
+    #print( Data::Dumper::Dumper( $ref_config_h ) );
 
     my $need_act = isUpdateNecessary( $config_h, $inifile );
     if( $need_act == 0 ){
-        print( qq{config.ini: Already up to date\n} );
+        print( qq{$inifile_bname: Already up to date\n} );
         return;
     }elsif( $need_act == 2 ){
-        print( qq{config.ini: Create New\n} );
+        print( qq{$inifile_bname: Create New\n} );
     }
 
     open( INIFILE, '>', $inifile ) ||
         die( qq{error: $inifile: could not open file: $!} );
 
-    for my $k( sort( keys( %{ $conf } ) ) ){
+    for my $k( sort( keys( %{ $ref_config_h } ) ) ){
         #print( qq{key: $k\n} );
-        print INIFILE ( qq{$k="$conf->{ $k }"\n} );
+        print INIFILE ( qq{$k="$ref_config_h->{ $k }"\n} );
     }
 
     close( INIFILE );

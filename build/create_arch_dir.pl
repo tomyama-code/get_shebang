@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.9 $
+## - $Revision: 1.11 $
 ################################################################################
 
 use strict;                         # first released with perl 5
@@ -76,6 +76,8 @@ sub pl_main( @ )
     printf( qq{cd "%s"\n}, File::Spec->abs2rel( "$main::apppath/$arch_dir" ) );
     print( qq{[unix]\n../build_unix.sh\n} );
     print( qq{[windows]\n..\\build_msvc.bat\n} );
+
+    return 0;
 }
 
 ##########
@@ -165,7 +167,7 @@ sub exec_cmd( @ )
         $cmd = shift( @args );
     }
 
-    my $disp_cmd = qq{\n\e[34m\$ \e[0m$cmd} . array_to_str( ' ', @args );
+    my $disp_cmd = qq{\n\e[34m-\$ \e[0m$cmd} . array_to_str( ' ', @args );
     print( qq{$disp_cmd\n} );
 
 #    my $raw_status = system( $cmd, @args );

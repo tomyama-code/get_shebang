@@ -534,29 +534,31 @@ static void unte_resultFileOut( UNTE_PROGRAM_TESTS_S *pProgTests )
     if( err != 0 ){
 #else
     pResFile = fopen( RESULT_FILE, "wb" );
-    if( pResFile != NULL ){
+    if( pResFile == NULL ){
 #endif
-        tmym_cmFPrtf( pResFile, "res.\tpassed\tfailed\tassert\tmodule_name\ttest_function\n" );
-
-        for( mod_seq=0; mod_seq<pProgTests->moduleNum; mod_seq++ ){
-            pModTest = *( pProgTests->pModTests + mod_seq );
-
-            for( test_seq=0; test_seq<pModTest->testNum; test_seq++ ){
-                pTestFuncS = pModTest->pTestFunc + test_seq;
-
-                tmym_cmFPrtf( pResFile, "%s\t%d\t%d\t%d\t%s\t%s()\n",
-                    ( pTestFuncS->cnt_failed > 0 ) ? UT_MSG_NG : UT_MSG_OK,
-                    pTestFuncS->cnt_passed, pTestFuncS->cnt_failed, pTestFuncS->cnt_assert,
-                    pModTest->strModuleName, pTestFuncS->strFuncName );
-            }
-        }
-
-        tmym_cmFPrtf( pResFile, "%s\t%d\t%d\t%d\tTotal\n", ( pProgTests->cnt_failed > 0 ) ? UT_MSG_NG : UT_MSG_OK,
-                                pProgTests->cnt_passed, pProgTests->cnt_failed, pProgTests->cnt_assert );
-
-        fclose( pResFile );
-        pResFile = NULL;
+        return;
     }
+
+    tmym_cmFPrtf( pResFile, "res.\tpassed\tfailed\tassert\tmodule_name\ttest_function\n" );
+
+    for( mod_seq=0; mod_seq<pProgTests->moduleNum; mod_seq++ ){
+        pModTest = *( pProgTests->pModTests + mod_seq );
+
+        for( test_seq=0; test_seq<pModTest->testNum; test_seq++ ){
+            pTestFuncS = pModTest->pTestFunc + test_seq;
+
+            tmym_cmFPrtf( pResFile, "%s\t%d\t%d\t%d\t%s\t%s()\n",
+                ( pTestFuncS->cnt_failed > 0 ) ? UT_MSG_NG : UT_MSG_OK,
+                pTestFuncS->cnt_passed, pTestFuncS->cnt_failed, pTestFuncS->cnt_assert,
+                pModTest->strModuleName, pTestFuncS->strFuncName );
+        }
+    }
+
+    tmym_cmFPrtf( pResFile, "%s\t%d\t%d\t%d\tTotal\n", ( pProgTests->cnt_failed > 0 ) ? UT_MSG_NG : UT_MSG_OK,
+                            pProgTests->cnt_passed, pProgTests->cnt_failed, pProgTests->cnt_assert );
+
+    fclose( pResFile );
+    pResFile = NULL;
 
     return;
 }

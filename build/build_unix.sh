@@ -1,11 +1,11 @@
 #!/bin/sh
 ################################################################################
-## - $Revision: 1.11 $
+## - $Revision: 1.12 $
 ################################################################################
 
 sh_exec()
 {
-    my_echo "\n[34m$ [0m$@"
+    my_echo "\n[34m-$ [0m$@"
     "$@"
     exit_status=$?
     echo "exit_status=$exit_status"
@@ -55,6 +55,31 @@ errp()
     echo "$@" 1>&2
 }
 
+create_lcov_epilog_file()
+{
+    lcov_epilog_file="$1"
+    test_env="$2"
+cat <<__EOD__ >"$lcov_epilog_file"
+  <p>Test environment: $test_env</p>
+  <p><a href="../index.html">Up</a></p>
+
+</body>
+</html>
+__EOD__
+}
+
+summarize_test_results()
+{
+    ../utCounter.pl "$1" "$2" | tee "$3"
+}
+
+lcov_gen_html()
+{
+    sh_exec create_lcov_epilog_file "lcovEpilog-file" "$workdirname"
+    sh_exec genhtml --html-epilog "lcovEpilog-file" "$proj_name_ver.info" --output-directory "cov"
+    sh_exec summarize_test_results $proj_name_ver.info unittest_Result.tab unittest_Result.txt
+}
+
 execution_dir="`pwd`"
 builddir="`dirname \"$execution_dir\"`"
 if [ "`basename \"$builddir\"`" != 'build' ]; then
@@ -85,26 +110,28 @@ if [ "$TERMUX_VERSION" != '' ]; then
 fi
 
 sh_exec cmake $cmake_opts ../..
-sh_exec ../parse_config_h.pl
+sh_exec ../parse_config_h.pl --input config.h --output config.ini
+sh_exec . ./config.ini
+proj_name_ver="${PROJECT_NAME}-${PROJECT_VERSION}"
 sh_exec make
 sh_exec make test
 if [ -f "./src/CMakeFiles/get_shebang_ut_obj.dir/get_shebang.c.gcda" ]; then
-    sh_exec lcov --capture --directory ./src/CMakeFiles/get_shebang_ut_obj.dir --output-file coverage.info
+    sh_exec lcov --capture --directory ./src/CMakeFiles/get_shebang_ut_obj.dir --output-file $proj_name_ver.info --test-name "$proj_name_ver"
     # cov ディレクトリにHTMLレポートを出力
-    sh_exec genhtml coverage.info --output-directory cov
+    lcov_gen_html
 elif [ -f "./default.profraw" ]; then
     sh_exec llvm-profdata merge -sparse default.profraw -o default.profdata
     sh_exec llvm-cov report ./test/get_shebang_test -instr-profile=default.profdata
     # cov_llvm ディレクトリにHTMLレポートを出力
-    sh_exec llvm-cov show ./test/get_shebang_test -instr-profile=default.profdata -format=html -output-dir=cov_llvm
+    sh_exec llvm-cov show ./test/get_shebang_test -instr-profile=default.profdata -format=html -output-dir=cov_llvm -show-branches=count
 
     which genhtml >/dev/null 2>&1
     genhtml_missing=$?
     if [ $genhtml_missing -eq 0 ]; then
         # lcov が理解できる「coverage.info」ファイルに変換
-        llvm-cov export ./test/get_shebang_test -instr-profile=default.profdata -format=lcov > coverage.info
+        llvm-cov export ./test/get_shebang_test -instr-profile=default.profdata -format=lcov > $proj_name_ver.info
         # cov ディレクトリにHTMLレポートを出力
-        sh_exec genhtml coverage.info --output-directory cov
+        lcov_gen_html
     fi
 fi
 sh_exec ../create_archive.pl

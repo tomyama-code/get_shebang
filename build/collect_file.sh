@@ -21,8 +21,10 @@ sh_main()
 #    done
 
     utility_dir="../tomyama_utility"
-    collect_source_file "test/tmym_common.c" "$utility_dir/tmym_common.c"
-    collect_source_file "test/tmym_common.h" "$utility_dir/tmym_common.h"
+    collect_source_file "build/utCounter.pl"    "$utility_dir/tool/utCounter.pl"
+    #collect_source_file "build/genIndexHtml.pl" "$utility_dir/tool/genIndexHtml.pl"
+    collect_source_file "test/tmym_common.c"    "$utility_dir/tmym_common.c"
+    collect_source_file "test/tmym_common.h"    "$utility_dir/tmym_common.h"
 }
 
 ## script setup
@@ -125,6 +127,7 @@ collect_source_file()
         ret_val=0
     elif [ $ret -eq 1 ]; then
         echo "$_dstfile: Update required."
+        diff "$_basefile" "$_dstfile"
         ret_val=1
     else
         echo "$_dstfile: Needs to be created."
@@ -133,7 +136,6 @@ collect_source_file()
 
     if [ $ret_val -ne 0 ]; then
         ls -l "$_basefile"
-        diff "$_basefile" "$_dstfile"
         cp -fp "$_basefile" "$_dstfile"
         echo "COPIED!"
     fi

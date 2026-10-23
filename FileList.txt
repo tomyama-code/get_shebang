@@ -1,5 +1,5 @@
 ################################################################################
-## - $Revision: 1.1 $
+## - $Revision: 1.2 $
 ################################################################################
 .clang-format
 .github/workflows/doxygen.yml
@@ -11,6 +11,7 @@ build/collect_file.sh
 build/create_arch_dir.pl
 build/create_archive.pl
 build/parse_config_h.pl
+build/utCounter.pl
 ChangeLog.md
 CMakeLists.txt
 config.h.in
@@ -41,6 +42,7 @@ test/testfiles/perl_script_utf16be_bom_pl
 test/testfiles/perl_script_utf16le_bom_pl
 test/testfiles/perl_script_utf32be_bom_pl
 test/testfiles/perl_script_utf32le_bom_pl
+test/testfiles/perl_script_ws_is_tab_pl
 test/testfiles/shell_script_bash
 test/testfiles/shell_script_sh
 test/testfiles/text_txt

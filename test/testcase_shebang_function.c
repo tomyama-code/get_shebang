@@ -8,8 +8,8 @@
  *     - 改行コードは LF
  *
  * \author   tomyama  2026
- * \version  $Revision: 1.1 $
- * \date     $Date: 2026-10-17 10:34:47+09 $
+ * \version  $Revision: 1.2 $
+ * \date     $Date: 2026-10-23 09:02:28+09 $
  ********************************************************************/
 
 
@@ -96,6 +96,12 @@ struct shebang_testfile_defined{
         "../../test/testfiles/perl_script_pl",
         "#!/usr/bin/perl -w",
         0, "/usr/bin/perl -w",
+        "/usr/bin/perl"
+    },
+    {
+        "../../test/testfiles/perl_script_ws_is_tab_pl",
+        "	#!/usr/bin/perl	-w	",
+        0, "/usr/bin/perl	-w",
         "/usr/bin/perl"
     },
     {

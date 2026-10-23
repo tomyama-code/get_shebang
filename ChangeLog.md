@@ -7,6 +7,18 @@
 - xxx
 
 
+## [0.0.6] - 2026-10-23
+### Added
+- `build/utCounter.pl`: A script that aggregates test results.
+- `test/testfiles/perl_script_ws_is_tab_pl`: Shebang using a tab character
+
+### Changed
+- Updated the various procedure scripts located in the `build` directory.
+- Added test cases for detecting tab characters.
+  - `test/testcase_shebang_function.c`
+- Fixed a bug that prevented the generation of `unittest_Result.tab` in an MSVC environment.
+  - `test/unit_test.c`
+
 ## [0.0.5] - 2026-10-21
 ### Added
 - `build/parse_config_h.pl`

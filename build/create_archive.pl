@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.11 $
+## - $Revision: 1.12 $
 ################################################################################
 
 use strict;                         # first released with perl 5
@@ -184,7 +184,7 @@ sub exec_cmd( @ )
         $cmd = shift( @args );
     }
 
-    my $disp_cmd = qq{\n\e[34m\$ \e[0m$cmd} . array_to_str( ' ', @args );
+    my $disp_cmd = qq{\n\e[34m-\$ \e[0m$cmd} . array_to_str( ' ', @args );
     print( qq{$disp_cmd\n} );
 
 #    my $raw_status = system( $cmd, @args );
