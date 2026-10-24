@@ -1,0 +1,3 @@
+#!  /usr/bin/env  -S  foo  -w
+
+print( qq{ok\n} );

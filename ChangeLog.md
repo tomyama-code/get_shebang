@@ -7,6 +7,18 @@
 - xxx
 
 
+## [0.0.7] - 2026-10-24
+### Added
+- `build/test_results_for_each_env.pl`: A script that aggregates test results.
+
+### Changed
+- Fixed a bug in the handling of shebang lines that specified an interpreter not found in the dictionary.
+  - `src/get_shebang.c`
+  - `test/testcase_shebang_function.c`
+- Added a process to publish a list of test results to GitHub Pages.
+  - `.github/workflows/doxygen.yml`
+- Updated the various procedure scripts located in the `build` directory.
+
 ## [0.0.6] - 2026-10-23
 ### Added
 - `build/utCounter.pl`: A script that aggregates test results.

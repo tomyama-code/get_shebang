@@ -1,0 +1,3 @@
+#!  /usr/bin/envv  -S  
+# 壊れたシバン
+print( qq{ok\n} );

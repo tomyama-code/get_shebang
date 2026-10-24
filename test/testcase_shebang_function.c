@@ -8,8 +8,8 @@
  *     - 改行コードは LF
  *
  * \author   tomyama  2026
- * \version  $Revision: 1.2 $
- * \date     $Date: 2026-10-23 09:02:28+09 $
+ * \version  $Revision: 1.4 $
+ * \date     $Date: 2026-10-24 12:52:57+09 $
  ********************************************************************/
 
 
@@ -44,6 +44,7 @@
 /********************************************************************/
 
 static void unittest_shebang_get_shebang( void );
+static void unittest_shebang_get_token_from_shebang( void );
 static void unittest_shebang_get_shebang_interpreter( void );
 static void unittest_shebang_extract_interpreter_name( void );
 
@@ -54,6 +55,7 @@ static void unittest_shebang_extract_interpreter_name( void );
 
 static UNTE_TESTFUNC_S testfuncs[] = {
     UNTE_DEF_FUNC(unittest_shebang_get_shebang),
+    UNTE_DEF_FUNC(unittest_shebang_get_token_from_shebang),
     UNTE_DEF_FUNC(unittest_shebang_get_shebang_interpreter),
     UNTE_DEF_FUNC(unittest_shebang_extract_interpreter_name)
 };
@@ -145,6 +147,30 @@ struct shebang_testfile_defined{
         "#!/usr/bin/perl -w",
         -3, "",
         NULL
+    },
+    {
+        "../../test/testfiles/env_bar",
+        "#!  /usr/bin/env  -S  ",
+        0, "/usr/bin/env  -S",
+        NULL
+    },
+    {
+        "../../test/testfiles/env_bar2",
+        "#!  /usr/bin/env  ",
+        0, "/usr/bin/env",
+        NULL
+    },
+    {
+        "../../test/testfiles/env_broken",
+        "#!  /usr/bin/envv  -S  ",
+        0, "/usr/bin/envv  -S",
+        "/usr/bin/envv"
+    },
+    {
+        "../../test/testfiles/env_foo_bar",
+        "#!  /usr/bin/env  -S  foo  -w",
+        0, "/usr/bin/env  -S  foo  -w",
+        "foo"
     },
     {
         "../../test/testfiles/env_go_script",
@@ -239,6 +265,68 @@ static void unittest_shebang_get_shebang( void )
     return;
 }
 
+static void unittest_shebang_get_token_from_shebang( void )
+{
+    static char buff[ BUFF_SZ ];
+    char *pToken = NULL;
+
+    pToken = get_token_from_shebang( "  /usr/bin/env -S perl -w  ", buff, BUFF_SZ );
+    if( UNTE_ASSERT( pToken != NULL ) ){
+        if( UNTE_ASSERT( strcmp( pToken, "/usr/bin/env" ) == 0 ) ){
+            printf( "pToken=\"%s\": buff=\"%s\"\n", pToken, buff );
+        }
+    }
+
+    pToken = get_token_from_shebang( NULL, buff, BUFF_SZ );
+    if( UNTE_ASSERT( pToken != NULL ) ){
+        if( UNTE_ASSERT( strcmp( pToken, "-S" ) == 0 ) ){
+            printf( "pToken=\"%s\": buff=\"%s\"\n", pToken, buff );
+        }
+    }
+
+    pToken = get_token_from_shebang( NULL, buff, BUFF_SZ );
+    if( UNTE_ASSERT( pToken != NULL ) ){
+        if( UNTE_ASSERT( strcmp( pToken, "perl" ) == 0 ) ){
+            printf( "pToken=\"%s\": buff=\"%s\"\n", pToken, buff );
+        }
+    }
+
+    pToken = get_token_from_shebang( NULL, buff, BUFF_SZ );
+    if( UNTE_ASSERT( pToken != NULL ) ){
+        if( UNTE_ASSERT( strcmp( pToken, "-w" ) == 0 ) ){
+            printf( "pToken=\"%s\": buff=\"%s\"\n", pToken, buff );
+        }
+    }
+
+    pToken = get_token_from_shebang( NULL, buff, BUFF_SZ );
+    if( UNTE_ASSERT( pToken == NULL ) ){
+        printf( "pToken=\"%s\": buff=\"%s\"\n", pToken, buff );
+    }
+
+    // 2巡目
+    pToken = get_token_from_shebang( NULL, buff, BUFF_SZ );
+    if( UNTE_ASSERT( pToken != NULL ) ){
+        if( UNTE_ASSERT( strcmp( pToken, "/usr/bin/env" ) == 0 ) ){
+            printf( "pToken=\"%s\": buff=\"%s\"\n", pToken, buff );
+        }
+    }
+
+
+    pToken = get_token_from_shebang( "  /usr/bin/env -S perl -w  ", buff, 27 );
+    if( UNTE_ASSERT( pToken == NULL ) ){
+        printf( "pToken=\"%s\": buff=\"%s\"\n", pToken, buff );
+    }
+
+    pToken = get_token_from_shebang( "  /usr/bin/env -S perl -w  ", buff, 28 );
+    if( UNTE_ASSERT( pToken != NULL ) ){
+        if( UNTE_ASSERT( strcmp( pToken, "/usr/bin/env" ) == 0 ) ){
+            printf( "pToken=\"%s\": buff=\"%s\"\n", pToken, buff );
+        }
+    }
+
+    return;
+}
+
 static void unittest_shebang_get_shebang_interpreter( void )
 {
     static char buff[ BUFF_SZ ];
@@ -257,6 +345,18 @@ static void unittest_shebang_get_shebang_interpreter( void )
         printf( "pTestFile=\"../../test/testfiles/broken_shebang_2\": pInterpreter=\"%s\"\n", pInterpreter );
     }
 
+    pInterpreter = get_shebang_interpreter( "../../test/testfiles/broken_shebang_3", buff, BUFF_SZ );
+    if( UNTE_ASSERT( pInterpreter != NULL ) ){
+        if( UNTE_ASSERT( strcmp( pInterpreter, "/" ) == 0 ) ){
+            printf( "pTestFile=\"../../test/testfiles/broken_shebang_3\": pInterpreter=\"%s\"\n", pInterpreter );
+        }
+    }
+
+    pInterpreter = get_shebang_interpreter( "../../test/testfiles/broken_shebang_4", buff, BUFF_SZ );
+    if( UNTE_ASSERT( pInterpreter == NULL ) ){
+        printf( "pTestFile=\"../../test/testfiles/broken_shebang_4\": pInterpreter=\"%s\"\n", pInterpreter );
+    }
+
     for( int idx=0; idx<SHEBANG_TESTFILES_NUM; idx++ ){
         struct shebang_testfile_defined *pTF = &( shebang_testfiles[ idx ] );
         pInterpreter = get_shebang_interpreter( pTF->pTestFile, buff, BUFF_SZ );
@@ -265,7 +365,10 @@ static void unittest_shebang_get_shebang_interpreter( void )
                 printf( "pTestFile=\"%s\": pInterpreter=\"%s\"\n", pTF->pTestFile, pInterpreter );
             }
         }else{
-            if( UNTE_ASSERT( strcmp( pInterpreter, pTF->pExpect_get_shebang_interpreter ) == 0 ) ){
+            if( pInterpreter == NULL ){
+                UNTE_ASSERT( 0 );
+                printf( "pTestFile=\"%s\": buff=\"%s\"\n", pTF->pTestFile, buff );
+            }else if( UNTE_ASSERT( strcmp( pInterpreter, pTF->pExpect_get_shebang_interpreter ) == 0 ) ){
                 printf( "pTestFile=\"%s\": buff=\"%s\"\n", pTF->pTestFile, buff );
             }
         }

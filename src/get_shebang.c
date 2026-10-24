@@ -8,8 +8,8 @@
  *     - 改行コードは LF
  *
  * \author   tomyama  2026
- * \version  $Revision: 1.5 $
- * \date     $Date: 2026-10-18 13:37:49+09 $
+ * \version  $Revision: 1.9 $
+ * \date     $Date: 2026-10-24 12:52:23+09 $
  *
  * \example test/testcase_shebang_function.c
  ********************************************************************/
@@ -92,7 +92,9 @@ int get_shebang( const char *const pFilename, char *const pBuff, const size_t si
 
     buf = _gsi_malloc( size );
     if( buf == NULL ){
+#ifndef EE_PLUGIN_DEV
         fprintf( stderr, "error: could not get buf memory\n" );
+#endif
         goto FAIL_MALLOC;
     }
 
@@ -190,18 +192,34 @@ char *get_token_from_shebang( const char *const pSheBang, char *const pBuff, con
         memset( pBuff, 0x00, size );
 
         shebang_len = strlen( pSheBang );
-        memcpy( pBuff, pSheBang, shebang_len + 1 );
+        size_t copy_len = ( shebang_len + 1 );
+        if( copy_len > size ){
+#ifndef EE_PLUGIN_DEV
+            fprintf( stderr,
+                "error: copy_len=%zu, size=%zu: The size of pBuff is insufficient.\n",
+                copy_len, size );
+#endif
+            return NULL;
+        }
+        memcpy( pBuff, pSheBang, copy_len );
         pch = NULL;
         idx_next = 0;
+        int seq = 0;
         for( idx=0, pch_curr=pBuff; idx<shebang_len; idx++, pch_curr++ ){
             switch( *pch_curr ){
                 case ' ':
                 case '\t':
                     *pch_curr = '\0';
+                    if( seq == 1 ){
+                        seq++;
+                    }
                     break;
                 default:
                     if( pch == NULL ){
+                        seq++;
                         pch = pch_curr;
+                    }else if( seq == 2 ){
+                        seq++;
                         idx_next = idx;
                     }
                     break;
@@ -210,22 +228,25 @@ char *get_token_from_shebang( const char *const pSheBang, char *const pBuff, con
     }else{
         pch = NULL;
         int seq = 0;
-        for( idx=idx_next, pch_curr=( pBuff + idx_next ); idx<shebang_len; idx++, pch_curr++ ){
+        for( idx=idx_next, pch_curr=( pBuff + idx_next ); idx<=shebang_len; idx++, pch_curr++ ){
             switch( *pch_curr ){
                 case '\0':
-                    if( seq == 0 ){
+                    if( seq == 1 ){
                         seq++;
+                        idx_next = idx;
                     }
                     break;
                 default:
-                    if( seq == 1 ){
+                    if( seq == 0 ){
                         seq++;
-                        pch = pch_curr;
+                        pch = ( pBuff + idx_next );
+                    }else if( seq == 2 ){
+                        seq++;
                         idx_next = idx;
                     }
                     break;
             }
-            if( seq == 2 ){
+            if( seq == 3 ){
                 break;
             }
         }
@@ -251,7 +272,9 @@ char *get_shebang_interpreter( const char *const pFilename, char *const pBuff, c
 
     pShebang = _gsi_malloc( size );
     if( pShebang == NULL ){
+#ifndef EE_PLUGIN_DEV
         fprintf( stderr, "error: could not get pShebang memory\n" );
+#endif
         return NULL;
     }
     ret = get_shebang( pFilename, pShebang, size );
@@ -259,6 +282,7 @@ char *get_shebang_interpreter( const char *const pFilename, char *const pBuff, c
 #ifndef EE_PLUGIN_DEV
         fprintf( stderr, "error: get_shebang( \"%s\" ): failure\n", pFilename );
 #endif
+        free( pShebang );
         return NULL;
     }
     DBGP( "ret=%d, shebang=\"%s\"\n", ret, pShebang );
@@ -289,8 +313,17 @@ char *get_shebang_interpreter( const char *const pFilename, char *const pBuff, c
         pInterpreter = token;
         DBGP( "interpreter is \"%s\"\n", pInterpreter );
     }else{
-        while( token != NULL ){
+        while( 1 ){
+            token = get_token_from_shebang( NULL, pBuff, size );
+            if( token == NULL ){
+                break;
+            }
             DBGP( "token=\"%s\"\n", token );
+
+            // 絶対にインタプリタではない
+            if( strncmp( token, "-", 1 ) == 0 ){
+                continue;
+            }
 
             for( int idx=0; idx<interpreters_len; idx++ ){
                 char *ip = interpreters[ idx ];
@@ -304,15 +337,18 @@ char *get_shebang_interpreter( const char *const pFilename, char *const pBuff, c
             if( pInterpreter != NULL ){
                 break;
             }
-
-            token = get_token_from_shebang( NULL, pBuff, size );
         }
         if( pInterpreter != NULL ){
             return pInterpreter;
         }
 
+        // BIN_ENV はスルー
         token = get_token_from_shebang( NULL, pBuff, size );
-        while( token != NULL ){
+        while( 1 ){
+            token = get_token_from_shebang( NULL, pBuff, size );
+            if( token == NULL ){
+                break;
+            }
             if( strncmp( token, "-", 1 ) != 0 ){
                 pInterpreter = token;
                 break;
@@ -382,7 +418,7 @@ static int _gsi_ferror( FILE *stream )
     return ferror( stream );
 }
 
-void _safe_copy( char *dest, size_t dest_size, const char *src )
+static void _safe_copy( char *dest, size_t dest_size, const char *src )
 {
 #ifdef HAVE_STRNCPY_S
     // Windows(MSVC) などのセキュア関数が使える場合

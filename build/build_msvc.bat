@@ -1,5 +1,5 @@
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: - $Revision: 1.3 $
+:: - $Revision: 1.4 $
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 @echo off
 setlocal enabledelayedexpansion
@@ -12,6 +12,7 @@ SET proj_name_ver=%PROJECT_NAME%-%PROJECT_VERSION%
 :: call :sh_exec echo %proj_name_ver%
 call :sh_exec cmake --build . --config Release
 call :sh_exec ctest -C Release
+perl ../utCounter.pl %proj_name_ver%.info unittest_Result.tab >unittest_Result.txt
 
 echo ‚·‚×‚Ä‚Ìˆ—‚ª³í‚ÉŠ®—¹‚µ‚Ü‚µ‚½B
 exit /b 0

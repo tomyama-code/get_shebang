@@ -34,6 +34,8 @@ jobs:
           doxygen Doxyfile
           mv ./doc ./_site
           mv ./_site/html ./_site/doc
+          tar xzf test_result.tar.gz
+          mv ./cov ./_site/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

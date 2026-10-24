@@ -1,5 +1,5 @@
 ################################################################################
-## - $Revision: 1.2 $
+## - $Revision: 1.3 $
 ################################################################################
 .clang-format
 .github/workflows/doxygen.yml
@@ -11,6 +11,7 @@ build/collect_file.sh
 build/create_arch_dir.pl
 build/create_archive.pl
 build/parse_config_h.pl
+build/test_results_for_each_env.pl
 build/utCounter.pl
 ChangeLog.md
 CMakeLists.txt
@@ -27,6 +28,12 @@ test/CMakeLists.txt
 test/testcase_shebang_function.c
 test/testfiles/broken_shebang
 test/testfiles/broken_shebang_2
+test/testfiles/broken_shebang_3
+test/testfiles/broken_shebang_4
+test/testfiles/env_bar
+test/testfiles/env_bar2
+test/testfiles/env_broken
+test/testfiles/env_foo_bar
 test/testfiles/env_go_script
 test/testfiles/env_java_11
 test/testfiles/env_java_25

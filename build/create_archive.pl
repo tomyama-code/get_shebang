@@ -1,13 +1,12 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.12 $
+## - $Revision: 1.13 $
 ################################################################################
 
 use strict;                         # first released with perl 5
 use warnings;                       # first released with perl v5.6.0
 use Cwd qw();                       # first released with perl 5
 use File::Basename qw();            # first released with perl 5
-use File::Path qw();                # first released with perl 5.001
 use Getopt::Long qw();              # first released with perl 5
 
 
