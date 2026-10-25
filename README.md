@@ -15,10 +15,11 @@
 
 - プロジェクト
   - [https://github.com/tomyama-code/get_shebang](https://github.com/tomyama-code/get_shebang)
-- ドキュメント
-  - [https://tomyama-code.github.io/get_shebang/doc/](https://tomyama-code.github.io/get_shebang/doc/)
-- テスト結果
-  - [https://tomyama-code.github.io/get_shebang/cov/](https://tomyama-code.github.io/get_shebang/cov/)
+- [生成ページ（Github Pages）](https://tomyama-code.github.io/get_shebang/)
+  - ドキュメント
+    - [https://tomyama-code.github.io/get_shebang/doc/](https://tomyama-code.github.io/get_shebang/doc/)
+  - テスト結果
+    - [https://tomyama-code.github.io/get_shebang/cov/](https://tomyama-code.github.io/get_shebang/cov/)
 
 ## 構成
 

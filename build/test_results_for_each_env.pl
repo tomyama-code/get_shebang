@@ -5,7 +5,7 @@
 ## - Created based on r1.10 of 'genIndexHtml.pl'
 ##
 ## - Author: tomyama   2026
-## - Version: 1 ( $Revision: 1.2 $ )
+## - Version: 1 ( $Revision: 1.3 $ )
 ## - Only for personal use !
 ################################################################################
 
@@ -470,19 +470,42 @@ sub genIndexHtml( $$ )
     return 0;
 }
 
-## Revision: 1.2
+## Revision: 1.4
 sub exec_cmd( @ )
 {
     my @args = @_;
-    my $cmd = shift( @args );
+
+    my $ref_num = 0;
+    for my $arg( @args ){
+        last if( ref( $arg ) eq '' );
+        $ref_num++;
+    }
+    #print( qq{\$ref_num=$ref_num\n} );
+
     my $ref_stdout = undef;
-    if( ref( $cmd ) ){
-        $ref_stdout = $cmd;
-        $cmd = shift( @args );
+    my $ref_config = undef;
+    if( $ref_num == 1 ){
+        $ref_config = shift( @args );
+    }elsif( $ref_num == 2 ){
+        $ref_config = shift( @args );
+        $ref_stdout = shift( @args );
+    }
+    my $cmd = shift( @args );
+
+    my $b_count_up = 0;
+    if( defined( $ENV{SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS} ) ){
+        $b_count_up = 1;
+        $ENV{SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS}++;
+    }else{
+        $b_count_up = 0;
+        $ENV{SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS} = 1;
     }
 
-    my $disp_cmd = qq{\n\e[34m-\$ \e[0m$cmd} . array_to_str( ' ', @args );
-    print( qq{$disp_cmd\n} );
+    if( !( defined( $ref_config->{DISPLAY_PROMPT} ) &&
+            $ref_config->{DISPLAY_PROMPT} == 0 ) ){
+        my $disp_cmd = qq{\n\e[34m$ENV{SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS}-\$ \e[0m$cmd} . array_to_str( ' ', @args );
+        print( qq{$disp_cmd\n} );
+    }
 
 #    my $raw_status = system( $cmd, @args );
     open( EXEC_CMD, '-|', $cmd, @args ) ||
@@ -492,11 +515,26 @@ sub exec_cmd( @ )
         my $line = $_;
         $line =~ s/\r?\n$//o;
         $$ref_stdout .= qq{$line\n} if( defined( $ref_stdout ) );
-        print( qq{$line\n} );
+        if( !( defined( $ref_config->{DISPLAY_OUTPUT} ) &&
+                $ref_config->{DISPLAY_OUTPUT} == 0 ) ){
+            print( qq{$line\n} );
+        }
     }
     close( EXEC_CMD );
     my $raw_status = $?;
     my $exit_status = $raw_status >> 8;
+
+    if( !( defined( $ref_config->{DISPLAY_EXIT_STATUS} ) &&
+            $ref_config->{DISPLAY_EXIT_STATUS} == 0 ) ){
+        print( qq{$ENV{SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS}: exit_status=$exit_status\n} );
+    }
+
+    if( $b_count_up ){
+        $ENV{SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS}--;
+    }else{
+        delete( $ENV{SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS} );
+    }
+
     return $exit_status;
 }
 

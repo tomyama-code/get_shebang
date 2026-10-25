@@ -1,14 +1,31 @@
 #!/bin/sh
 ################################################################################
-## - $Revision: 1.12 $
+## - $Revision: 1.13 $
 ################################################################################
 
+## Revision: 1.1
 sh_exec()
 {
-    my_echo "\n[34m-$ [0m$@"
+    b_count_up=0
+    if [ "$SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS" = '' ]; then
+        b_count_up=0
+        SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS=1
+        export SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS
+    else
+        b_count_up=1
+        SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS=`expr "$SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS" '+' '1'`
+        export SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS
+    fi
+    my_echo "\n[34m${SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS}-$ [0m$@"
     "$@"
     exit_status=$?
-    echo "exit_status=$exit_status"
+    echo "$SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS: exit_status=$exit_status"
+    if [ $b_count_up -eq 0 ]; then
+        unset SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS
+    else
+        SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS=`expr "$SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS" '-' '1'`
+        export SH_EXEC_NUMBER_OF_PROMPT_RECURSIONS
+    fi
     if [ $exit_status -ne 0 ]; then
         exit 1
     fi

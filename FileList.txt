@@ -1,9 +1,10 @@
 ################################################################################
-## - $Revision: 1.3 $
+## - $Revision: 1.4 $
 ################################################################################
 .clang-format
 .github/workflows/doxygen.yml
 .gitignore
+_site_index.tar.gz
 build/build_msvc.bat
 build/build_unix.sh
 build/CMakeLists.txt

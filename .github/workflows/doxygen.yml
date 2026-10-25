@@ -36,6 +36,7 @@ jobs:
           mv ./_site/html ./_site/doc
           tar xzf test_result.tar.gz
           mv ./cov ./_site/
+          tar xzf _site_index.tar.gz
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

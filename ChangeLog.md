@@ -7,6 +7,13 @@
 - xxx
 
 
+## [0.0.8] - 2026-10-25
+### Changed
+- Create the top page for GitHub Pages.
+  - `.github/workflows/doxygen.yml`
+  - `_site_index.tar.gz`
+- Updated the various procedure scripts located in the `build` directory.
+
 ## [0.0.7] - 2026-10-24
 ### Added
 - `build/test_results_for_each_env.pl`: A script that aggregates test results.
