@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.4 $
+## - $Revision: 1.5 $
 ################################################################################
 
 package parse_config_h;
@@ -90,7 +90,7 @@ sub parse_arg( @ )
     local @ARGV = @main::argv;
 
     # 設定: ショートオプションのまとめ指定（バンドリング）を有効化
-    Getopt::Long::Configure("bundling");
+    Getopt::Long::Configure( "bundling" );
 
     Getopt::Long::GetOptions(
         'debug|d'         => \$main::debug,

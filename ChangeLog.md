@@ -7,6 +7,10 @@
 - xxx
 
 
+## [0.0.9] - 2026-10-26
+### Changed
+- Updated the various procedure scripts located in the `build` directory.
+
 ## [0.0.8] - 2026-10-25
 ### Changed
 - Create the top page for GitHub Pages.

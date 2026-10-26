@@ -1,6 +1,6 @@
 #!/bin/sh
 ################################################################################
-## - $Revision: 1.13 $
+## - $Revision: 1.14 $
 ################################################################################
 
 ## Revision: 1.1
@@ -77,8 +77,42 @@ create_lcov_epilog_file()
     lcov_epilog_file="$1"
     test_env="$2"
 cat <<__EOD__ >"$lcov_epilog_file"
-  <p>Test environment: $test_env</p>
-  <p><a href="../index.html">Up</a></p>
+  <table cellpadding=1 border=0>
+    <tr>
+      <td class="headerItem">Test environment:</td>
+      <td class="headerValue">$test_env</td>
+    </tr>
+  </table>
+  <style>
+    .modern-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 3px 3px;
+      background: #ffffff;
+      border: 2px solid currentColor;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 6px;
+    }
+
+    .modern-button svg {
+      /* アイコンのサイズ調整 */
+      width: 20px;
+      height: 20px;
+    }
+  </style>
+  <p>
+    <a class="modern-button" href="..">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 9l5-5l5 5" />
+        <path d="M10 22l7 0" />
+        <path d="M10 22V4" />
+      </svg>
+    </a>
+    <a href="..">Up</a>
+  </p>
 
 </body>
 </html>
