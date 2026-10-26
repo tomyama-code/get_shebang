@@ -44,9 +44,11 @@ int main( int argc, char *argv[] )
                 fprintf( stderr, "error: get_shebang_interpreter(): failure\n" );
                 ret_val = 1;
             }else{
-                //! - 3. パスからインタプリタ名を抽出して出力
-                char *pInterpreterName = extract_interpreter_name( pInterpreter );
-                printf( "%s\n", pInterpreterName );
+                //! - 3. 取得したインタプリタ名を出力
+                printf( "%s\n", pInterpreter );
+//                //! - 3. パスからインタプリタ名を抽出して出力
+//                char *pInterpreterName = extract_interpreter_name( pInterpreter );
+//                printf( "%s\n", pInterpreterName );
             }
         }
     }

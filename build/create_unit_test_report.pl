@@ -5,7 +5,7 @@
 ## - Created based on r1.10 of 'genIndexHtml.pl'
 ##
 ## - Author: tomyama   2026
-## - Version: 1 ( $Revision: 1.4 $ )
+## - Version: 1 ( $Revision: 1.5 $ )
 ## - Only for personal use !
 ################################################################################
 
@@ -17,7 +17,7 @@ use Cwd qw();                       # first released with perl 5
 use File::Basename qw();            # first released with perl 5
 use File::Path qw();                # first released with perl 5.001
 use Getopt::Long qw();              # first released with perl 5
-use Time::Piece qw();               # first released with perl v5.9.5
+use Time::Piece;                    # first released with perl v5.9.5
 
 
 my $outputFile = "cov/index.html";
@@ -112,7 +112,12 @@ sub pl_main( @ )
                 die( qq{error: cp command was failure\n} );
             }
         }
-        my $exit_status = exec_cmd( 'cp', '-f',
+        my %cmd_conf = (
+            DISPLAY_PROMPT => 0,
+            DISPLAY_OUTPUT => 0,
+            DISPLAY_EXIT_STATUS => 0,
+        );
+        my $exit_status = exec_cmd( \%cmd_conf, 'cp', '-f',
             "$build_dir/$envName/unittest_Result.txt",
             "$devDirTop/$cov_dir/$envName.txt" );
         if( $exit_status != 0 ){
@@ -144,8 +149,10 @@ sub init_script()
     #$main::debug = 0;
     $main::argc = 0;
     @main::argv = ();
-    $main::proj_name = '';
-    $main::proj_version = '';
+    $main::PROJ_NAME = '';
+    $main::PROJ_VERSION = '';
+    my $t = localtime();    # use Time::Piece
+    $main::GEN_DATE_AND_TIME = $t->strftime( '%Y-%m-%d %H:%M:%S %z' );
     $main::debug = 0;
     ##############
 }
@@ -157,16 +164,18 @@ sub param_print()
              qq{     \$main::appname = "%s"\n} .
              qq{     \$main::argc = %d\n} .
              qq{     \@main::argv = (%s)\n} .
-             qq{     \$main::proj_name = "%s"\n} .
-             qq{     \$main::proj_version = "%s"\n} .
+             qq{     \$main::PROJ_NAME = "%s"\n} .
+             qq{     \$main::PROJ_VERSION = "%s"\n} .
+             qq{     \$main::GEN_DATE_AND_TIME = "%s"\n} .
              qq{     \$main::debug = %d\n},
         $main::execution_dir,
         $main::apppath,
         $main::appname,
         $main::argc,
         array_to_str( ', ', @main::argv ),
-        $main::proj_name,
-        $main::proj_version,
+        $main::PROJ_NAME,
+        $main::PROJ_VERSION,
+        $main::GEN_DATE_AND_TIME,
         $main::debug );
 }
 
@@ -295,7 +304,7 @@ my $tmplIndexHtmlHeader = q{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transit
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>%%<ProjName>%%</title>
+  <title>%%<PROJ_NAME>%%</title>
   <link rel="stylesheet" type="text/css" href="%%<ResourceDir>%%/gcov.css">
   <style>
     .modern-button {
@@ -321,9 +330,19 @@ my $tmplIndexHtmlHeader = q{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transit
 
 <body>
 
-
   <table width="100%" border=0 cellspacing=0 cellpadding=0>
-    <tr><td class="title">%%<ProjName>%% : %%<ProjVersion>%% : Unit Test Report</td></tr>
+    <tr><td class="title">%%<PROJ_NAME>%% : %%<PROJ_VERSION>%% : Unit Test Report</td></tr>
+    <tr><td class="ruler"><img src="%%<ResourceDir>%%/glass.png" width=3 height=3 alt=""></td></tr>
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0>
+          <tr>
+            <td class="headerItem">Generation date and time:</td>
+            <td class="headerValue">%%<GEN_DATE_AND_TIME>%%</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
     <tr><td class="ruler"><img src="%%<ResourceDir>%%/glass.png" width=3 height=3 alt=""></td></tr>
     <tr>
       <table width="100%" cellpadding=1 cellspacing=1 border=0>
@@ -339,7 +358,7 @@ my $tmplIndexHtmlHeader = q{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transit
         </tr>
 
         <tr>
-          <td class="tableHead">Environment</td>
+          <td class="tableHead">Test Environment</td>
           <td class="tableHead">Date</td>
           <td class="tableHead" colspan=2>Success Rate</td>
           <td class="tableHead" colspan=3>Line Coverage <span class="tableHeadSort"></td>
@@ -433,8 +452,9 @@ sub htmlReplaceKeyword( $$$ )
     my $curr_dir = Cwd::getcwd();
     #print( qq{\$curr_dir = "$curr_dir"\n} );
 
-    $tmplHtml =~ s!%%<ProjName>%%!$main::proj_name!go;
-    $tmplHtml =~ s!%%<ProjVersion>%%!$main::proj_version!go;
+    $tmplHtml =~ s!%%<PROJ_NAME>%%!$main::PROJ_NAME!go;
+    $tmplHtml =~ s!%%<PROJ_VERSION>%%!$main::PROJ_VERSION!go;
+    $tmplHtml =~ s!%%<GEN_DATE_AND_TIME>%%!$main::GEN_DATE_AND_TIME!go;
 
     my $ResourceDir = '.';
     my $envs_num = scalar( @{ $devInfo->Envs } );
@@ -546,7 +566,7 @@ sub htmlReplaceKeyword( $$$ )
 
 sub collect_project_name_and_version()
 {
-    ## $main::proj_name, $main::proj_version を取得
+    ## $main::PROJ_NAME, $main::PROJ_VERSION を取得
     open( CMAKELISTS, '<', "$main::apppath/../CMakeLists.txt" ) ||
         die( qq{'CMakeLists.txt': could not open file: $!} );
     while( my $line = <CMAKELISTS> ){
@@ -557,13 +577,13 @@ sub collect_project_name_and_version()
             #print( qq{"$1"\n} );
             ## "get_shebang VERSION 0.0.1 LANGUAGES C"
             my( $project_name, @fields ) = split( /\s+/, $1 );
-            $main::proj_name = $project_name;
+            $main::PROJ_NAME = $project_name;
             my $version_found = 0;
             for my $f( @fields ){
                 #print( qq{F: $f\n} );
                 if( $version_found ){
                     $version_found = 0;
-                    $main::proj_version = $f;
+                    $main::PROJ_VERSION = $f;
                     last;
                 }elsif( lc( $f ) eq 'version' ){
                     $version_found = 1;
@@ -589,10 +609,12 @@ sub genIndexHtml( $$ )
     open( OUTPHTML, ">$outFile" ) || die( "$outFile: could not open file: $!" );
     print OUTPHTML ( "$htmlHeader" );
 
-    ## テスト環境名の名前順に出力する
-    for my $idx( sort{ $devInfo->Envs->[ $b ]->EnvName cmp $devInfo->Envs->[ $a ]->EnvName }( @{[ 0..$#{$devInfo->Envs} ]} ) ){
-#    ## テストの実行日時が新しい順に出力する
-#    for my $idx( sort{ $devInfo->Envs->[ $b ]->Date cmp $devInfo->Envs->[ $a ]->Date }( @{[ 0..$#{$devInfo->Envs} ]} ) ){
+    for my $idx( sort{
+        ## テスト環境名の名前順に出力する
+        lc( $devInfo->Envs->[ $a ]->EnvName ) cmp lc( $devInfo->Envs->[ $b ]->EnvName )
+#        ## テストの実行日時が新しい順に出力する
+#        $devInfo->Envs->[ $b ]->Date cmp $devInfo->Envs->[ $a ]->Date
+    }( @{ [ 0..$#{ $devInfo->Envs } ] } ) ){
         my $htmlEntry  = htmlReplaceKeyword( $devInfo, $idx, $tmplIndexHtmlEntry );
         print OUTPHTML ( "$htmlEntry" );
     }

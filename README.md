@@ -7,23 +7,27 @@
 
 - `get_shebang_interpreter` というコマンドとしてビルド
   - EmEditorの外部ツールでスクリプトか否かの判定で使用
+
+![Image of the get_shebang_interpreter command execution](https://tomyama-code.github.io/get_shebang/get_shebang_interpreter.png)
+
 - `shebang.h`, `shebang.c`, `config.h` は、EmEditorのプラグイン`SelectConfFromShebang.dll`でも使用
   - `config.h`はMSVC環境で作成したものを用いる
     - 正しい情報は、`plugin_select_config_from_shebang/collect_file.sh` を参照
 
-## サイト
-
-- プロジェクト
-  - [https://github.com/tomyama-code/get_shebang](https://github.com/tomyama-code/get_shebang)
-- [生成ページ（Github Pages）](https://tomyama-code.github.io/get_shebang/)
-  - ドキュメント
-    - [https://tomyama-code.github.io/get_shebang/doc/](https://tomyama-code.github.io/get_shebang/doc/)
-  - テスト結果
-    - [https://tomyama-code.github.io/get_shebang/cov/](https://tomyama-code.github.io/get_shebang/cov/)
-
 ## 構成
 
-- CMakeを使用している
+- CMakeを使用したマルチプラットフォームのプロジェクト
+- ビルドはユーザが作成した`build/*環境用のディレクトリ*` でおこなう
+
+## サイト
+
+- Github（リポジトリ）
+  - [https://github.com/tomyama-code/get_shebang](https://github.com/tomyama-code/get_shebang)
+- [Github Pages](https://tomyama-code.github.io/get_shebang/)
+  - ドキュメント（Doxygen）
+    - [https://tomyama-code.github.io/get_shebang/doc/](https://tomyama-code.github.io/get_shebang/doc/)
+  - テスト結果（lcov）
+    - [https://tomyama-code.github.io/get_shebang/cov/](https://tomyama-code.github.io/get_shebang/cov/)
 
 * * *
 
