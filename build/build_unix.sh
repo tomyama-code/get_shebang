@@ -1,6 +1,6 @@
 #!/bin/sh
 ################################################################################
-## - $Revision: 1.14 $
+## - $Revision: 1.15 $
 ################################################################################
 
 ## Revision: 1.1
@@ -145,16 +145,36 @@ workdir="$execution_dir"
 projdir="`dirname \"$builddir\"`"
 workdirname="`basename \"$workdir\"`"
 
-has_pending_changes=0
+echo "=== Checking directory status =========="
 if [ -d "$projdir/.git" ]; then
     git diff --exit-code "$projdir" >/dev/null
     has_pending_changes=$?
     if [ $has_pending_changes -ne 0 ]; then
-        echo "Modified from the repository !"
+        echo "*** Modified from the repository ! ***"
+
+        diff_of_CMakeLists="`git diff --unified=0 --exit-code ../../CMakeLists.txt`"
+        CMakeLists_has_pending_changes=$?
+        if [ $CMakeLists_has_pending_changes -eq 0 ]; then
+            errp "../../CMakeLists.txt: Please change the VERSION"
+            exit 1
+        fi
+
+        echo "$diff_of_CMakeLists" | grep VERSION >/dev/null
+        VERSION_is_no_change=$?
+        if [ $VERSION_is_no_change -ne 0 ]; then
+            errp "../../CMakeLists.txt: Please change the VERSION"
+            exit 1
+        fi
+
+        echo "*** VERSION has been updated ! ***"
+        echo "----------"
+        echo "$diff_of_CMakeLists"
+        echo "----------"
     fi
 else
-    echo "Not a Git clone directory !"
+    echo "*** Not a Git clone directory ! ***"
 fi
+echo "========================================"
 
 if [ "$TERMUX_VERSION" != '' ]; then
     cmake_opts='-DCMAKE_INSTALL_PREFIX=/data/data/com.termux/files/usr/local'
@@ -175,12 +195,12 @@ elif [ -f "./default.profraw" ]; then
     sh_exec llvm-cov report ./test/get_shebang_test -instr-profile=default.profdata
     # cov_llvm ディレクトリにHTMLレポートを出力
     sh_exec llvm-cov show ./test/get_shebang_test -instr-profile=default.profdata -format=html -output-dir=cov_llvm -show-branches=count
+    # lcov が理解できる「coverage.info」ファイルに変換
+    llvm-cov export ./test/get_shebang_test -instr-profile=default.profdata -format=lcov > $proj_name_ver.info
 
     which genhtml >/dev/null 2>&1
     genhtml_missing=$?
     if [ $genhtml_missing -eq 0 ]; then
-        # lcov が理解できる「coverage.info」ファイルに変換
-        llvm-cov export ./test/get_shebang_test -instr-profile=default.profdata -format=lcov > $proj_name_ver.info
         # cov ディレクトリにHTMLレポートを出力
         lcov_gen_html
     fi

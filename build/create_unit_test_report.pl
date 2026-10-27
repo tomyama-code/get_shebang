@@ -5,7 +5,7 @@
 ## - Created based on r1.10 of 'genIndexHtml.pl'
 ##
 ## - Author: tomyama   2026
-## - Version: 1 ( $Revision: 1.5 $ )
+## - Version: 1 ( $Revision: 1.6 $ )
 ## - Only for personal use !
 ################################################################################
 
@@ -42,6 +42,7 @@ struct EnvEntry => {
 };
 
 my $devDirTop;
+my $cov_dir = 'cov';
 
 my $envInfo;
 my %lcovConf;
@@ -55,7 +56,6 @@ sub pl_main( @ )
     param_print();
     chdir( "$main::apppath/.." );
 
-    my $cov_dir = 'cov';
     if( -d $cov_dir ){
         File::Path::rmtree( $cov_dir );
         print( qq{'$cov_dir': Delete the existing directory.\n} );
@@ -63,7 +63,7 @@ sub pl_main( @ )
     mkdir( $cov_dir );
     print( qq{'$cov_dir': Create directory.\n} );
 
-    my $devDirTop = Cwd::getcwd();
+    $devDirTop = Cwd::getcwd();
     #printf( qq{\$devDirTop = "$devDirTop"\n} );
     my $projName = File::Basename::basename( $devDirTop );
     #printf( qq{\$projName = "$projName"\n} );
@@ -104,10 +104,16 @@ sub pl_main( @ )
     for my $envName( sort( @devDirs ) ){
         #printf( qq{\$envName="$envName"\n} );
 
-        my $srcdir = "$build_dir/$envName/cov";
+        my $srcdir  = "$build_dir/$envName/cov";
+        my $srcdir2 = "$build_dir/$envName/cov_llvm";
         my $dstdir = "$devDirTop/$cov_dir/$envName";
         if( -d $srcdir ){
             my $exit_status = exec_cmd( 'cp', '-R', $srcdir, $dstdir );
+            if( $exit_status != 0 ){
+                die( qq{error: cp command was failure\n} );
+            }
+        }elsif( -d $srcdir2 ){
+            my $exit_status = exec_cmd( 'cp', '-R', $srcdir2, $dstdir );
             if( $exit_status != 0 ){
                 die( qq{error: cp command was failure\n} );
             }
@@ -479,7 +485,7 @@ sub htmlReplaceKeyword( $$$ )
         $tmplHtml =~ s!%%<EnvName>%%!$EnvName!go;
 
         my $EnvLink = $EnvName;
-        if( -f "build/$EnvName/cov/gcov.css" ){
+        if( -f "$devDirTop/$cov_dir/$EnvName/index.html" ){
             $EnvLink = qq{<a href="$EnvName/index.html">$EnvName</a>};
         }
         $tmplHtml =~ s!%%<EnvLink>%%!$EnvLink!go;
@@ -615,7 +621,7 @@ sub genIndexHtml( $$ )
 #        ## テストの実行日時が新しい順に出力する
 #        $devInfo->Envs->[ $b ]->Date cmp $devInfo->Envs->[ $a ]->Date
     }( @{ [ 0..$#{ $devInfo->Envs } ] } ) ){
-        my $htmlEntry  = htmlReplaceKeyword( $devInfo, $idx, $tmplIndexHtmlEntry );
+        my $htmlEntry = htmlReplaceKeyword( $devInfo, $idx, $tmplIndexHtmlEntry );
         print OUTPHTML ( "$htmlEntry" );
     }
     print OUTPHTML ( "$htmlFooter" );

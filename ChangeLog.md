@@ -7,6 +7,10 @@
 - xxx
 
 
+## [0.0.11] - 2026-10-28
+### Changed
+- Updated the various procedure scripts located in the `build` directory.
+
 ## [0.0.10] - 2026-10-27
 ### Changed
 - Updated the various procedure scripts located in the `build` directory.
