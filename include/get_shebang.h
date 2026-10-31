@@ -18,8 +18,8 @@
  *   - **推奨設定**: 意図しないビルドエラーを防ぐため、プロジェクト全体（ビルドオプションの全体設定など）で常時定義しておくことを推奨。
  *
  * @author   tomyama  2026
- * @version  $Revision: 1.4 $
- * @date     $Date: 2026-10-18 16:19:25+09 $
+ * @version  $Revision: 1.5 $
+ * @date     $Date: 2026-10-31 04:38:12+09 $
  *
  * @example test/testcase_shebang_function.c
  ********************************************************************/
@@ -28,6 +28,12 @@
 #define _GET_SHEBANG_H_
 
 //#define EE_PLUGIN_DEV
+
+#ifdef EE_PLUGIN_DEV
+ #ifndef _UNICODE
+  #error UNICODE must be defined.
+ #endif /* _UNICODE */
+#endif /* EE_PLUGIN_DEV */
 
 #include <stdio.h>  /* size_t */
 

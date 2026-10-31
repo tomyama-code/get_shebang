@@ -4,8 +4,14 @@
 ### Added
 - xxx
 ### Changed
-- xxx
+- MSVC, _CRT_SECURE_NO_WARNINGS
 
+
+## [0.0.12] - 2026-10-31
+### Changed
+- Change the output function used during debugging
+  - `include/get_shebang.h`
+  - `src/get_shebang.c`
 
 ## [0.0.11] - 2026-10-28
 ### Changed

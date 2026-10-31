@@ -8,8 +8,8 @@
  *     - 改行コードは LF
  *
  * \author   tomyama  2026
- * \version  $Revision: 1.9 $
- * \date     $Date: 2026-10-24 12:52:23+09 $
+ * \version  $Revision: 1.10 $
+ * \date     $Date: 2026-10-31 04:37:35+09 $
  *
  * \example test/testcase_shebang_function.c
  ********************************************************************/
@@ -19,6 +19,11 @@
 #include <errno.h>          /* errno */
 #include <string.h>         /* strerror(), memset() */
 #include <stdlib.h>         /* malloc(),free() */
+#ifdef EE_PLUGIN_DEV
+ #ifdef _DEBUG
+  #include <stdarg.h>
+ #endif
+#endif
 
 
 /********************************************************************/
@@ -35,6 +40,19 @@
  #define    DBGP(fmt,...)
 #endif /* GSI_DEBUG */
 
+#ifdef EE_PLUGIN_DEV
+ #ifdef _DEBUG
+  #define err_print( fmt )          _DebugPrint(fmt)
+  #define err_printf( fmt, ... )    _DebugPrint(fmt,__VA_ARGS__)
+ #else /* _DEBUG */
+  #define err_print( fmt, ... )
+  #define err_printf( fmt, ... )
+ #endif /* _DEBUG */
+#else /* EE_PLUGIN_DEV */
+ #define err_print( fmt )           fprintf(stderr,fmt)
+ #define err_printf( fmt, ... )     fprintf(stderr,fmt,__VA_ARGS__)
+#endif /* EE_PLUGIN_DEV */
+
 
 /********************************************************************/
 /*        types                                                     */
@@ -45,6 +63,9 @@
 /*        function prototype (static)                               */
 /********************************************************************/
 
+#ifdef EE_PLUGIN_DEV
+static void _DebugPrint( const char *format, ... );
+#endif /* EE_PLUGIN_DEV */
 static void *_gsi_malloc( size_t size );
 static size_t _gsi_fread( void *ptr, size_t size, size_t nmemb, FILE *stream );
 static int _gsi_ferror( FILE *stream );
@@ -92,9 +113,7 @@ int get_shebang( const char *const pFilename, char *const pBuff, const size_t si
 
     buf = _gsi_malloc( size );
     if( buf == NULL ){
-#ifndef EE_PLUGIN_DEV
-        fprintf( stderr, "error: could not get buf memory\n" );
-#endif
+        err_print( "error: could not get buf memory\n" );
         goto FAIL_MALLOC;
     }
 
@@ -194,11 +213,9 @@ char *get_token_from_shebang( const char *const pSheBang, char *const pBuff, con
         shebang_len = strlen( pSheBang );
         size_t copy_len = ( shebang_len + 1 );
         if( copy_len > size ){
-#ifndef EE_PLUGIN_DEV
-            fprintf( stderr,
+            err_printf(
                 "error: copy_len=%zu, size=%zu: The size of pBuff is insufficient.\n",
                 copy_len, size );
-#endif
             return NULL;
         }
         memcpy( pBuff, pSheBang, copy_len );
@@ -270,18 +287,15 @@ char *get_shebang_interpreter( const char *const pFilename, char *const pBuff, c
     char *token;
     char *pInterpreter;
 
+    /* malloc() */
     pShebang = _gsi_malloc( size );
     if( pShebang == NULL ){
-#ifndef EE_PLUGIN_DEV
-        fprintf( stderr, "error: could not get pShebang memory\n" );
-#endif
+        err_print( "error: could not get pShebang memory\n" );
         return NULL;
     }
     ret = get_shebang( pFilename, pShebang, size );
     if( ret != 0 ){
-#ifndef EE_PLUGIN_DEV
-        fprintf( stderr, "error: get_shebang( \"%s\" ): failure\n", pFilename );
-#endif
+        err_printf( "error: get_shebang( \"%s\" ): failure\n", pFilename );
         free( pShebang );
         return NULL;
     }
@@ -299,11 +313,10 @@ char *get_shebang_interpreter( const char *const pFilename, char *const pBuff, c
 
     token = get_token_from_shebang( pShebang, pBuff, size );
     free( pShebang );
+    /* free() */
 
     if( token == NULL ){
-#ifndef EE_PLUGIN_DEV
-        fprintf( stderr, "error: get_token_from_shebang( \"%s\" ): failure\n", pShebang );
-#endif
+        err_printf( "error: get_token_from_shebang( \"%s\" ): failure\n", pShebang );
         return NULL;
     }
 
@@ -387,6 +400,24 @@ char *extract_interpreter_name( char *const pInterpreterPath )
 /*        function (static)                                         */
 /********************************************************************/
 
+#ifdef EE_PLUGIN_DEV
+static void _DebugPrint( const char *format, ... )
+{
+#ifdef _DEBUG
+    char buf[ 1024 ];
+    va_list args;
+
+    va_start( args, format );
+    vsnprintf( buf, sizeof buf, format, args );
+    va_end( args );
+
+    // Visual Studioの出力ウィンドウへ送信
+    OutputDebugStringA( buf );
+#endif
+    return;
+}
+#endif /* EE_PLUGIN_DEV */
+
 static void *_gsi_malloc( size_t size )
 {
     if( size == 0 ){
@@ -453,16 +484,14 @@ static size_t _read_first_line( const char *const pFilename, char *const pBuff, 
     if( pfi == NULL ){
 #endif  /* HAVE_FOPEN_S */
 
-#ifndef EE_PLUGIN_DEV
- #ifdef HAVE_STRERROR_S
+#ifdef HAVE_STRERROR_S
         char msgbuf[ 1024 ];
         ( void )strerror_s( msgbuf, sizeof msgbuf, err );
- #else  /* HAVE_STRERROR_S */
+#else  /* HAVE_STRERROR_S */
         char *msgbuf = strerror( errno );
- #endif /* HAVE_STRERROR_S */
-        fprintf( stderr, "%s: %s: <%d>%s\n",
+#endif /* HAVE_STRERROR_S */
+        err_printf( "%s: %s: <%d>%s\n",
             __FUNCTION__, pFilename, errno, msgbuf );
-#endif  /* EE_PLUGIN_DEV */
         return 0;
     }
 
@@ -473,13 +502,11 @@ static size_t _read_first_line( const char *const pFilename, char *const pBuff, 
     //printf( "read_num=%zu, read_counter=%zu, read_sz=%zu\n", read_num, read_counter, read_sz );
     if( read_sz < read_num ){
         if( feof( pfi ) ){
-            //fprintf( stderr, "%s: EOF found\n", __FUNCTION__ );
+            //err_printf( "%s: EOF found\n", __FUNCTION__ );
             clearerr( pfi );    /* EOF指示子をクリアする */
         }else if( _gsi_ferror( pfi ) ){
-#ifndef EE_PLUGIN_DEV
-            fprintf( stderr, "%s: %d: fread() error\n",
+            err_printf( "%s: %d: fread() error\n",
                 __FUNCTION__, ferror( pfi ) );
-#endif
             clearerr( pfi );    /* エラー指示子をクリアする */
             fclose( pfi );
             return 0;           /* 関数を抜ける */

@@ -1,5 +1,5 @@
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: - $Revision: 1.4 $
+:: - $Revision: 1.5 $
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 @echo off
 setlocal enabledelayedexpansion
@@ -10,7 +10,7 @@ call :sh_exec perl ../parse_config_h.pl --input config.h --output config.ini
 FOR /F "tokens=1* delims== eol=;" %%I IN (config.ini) DO SET "%%I=%%~J"
 SET proj_name_ver=%PROJECT_NAME%-%PROJECT_VERSION%
 :: call :sh_exec echo %proj_name_ver%
-call :sh_exec cmake --build . --config Release
+call :sh_exec cmake --build . --config Release -- /fileLogger /fileLoggerParameters:LogFile=build.log
 call :sh_exec ctest -C Release
 perl ../utCounter.pl %proj_name_ver%.info unittest_Result.tab >unittest_Result.txt
 
