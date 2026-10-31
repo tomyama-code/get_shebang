@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.5 $
+## - $Revision: 1.6 $
 ################################################################################
 
 package parse_config_h;
@@ -191,6 +191,7 @@ sub config_h_to_ini( $$ )
 }
 
 # ハッシュにしてリファレンスを返す（Perlスクリプト向け）
+# config.h の情報を取得（つまりcmake実行後に使用可能になる）
 sub parse_config_h( $ )
 {
     my( $file ) = @_;
@@ -230,6 +231,47 @@ sub parse_config_h( $ )
     }
     close( $fh );
     return \%config;
+}
+
+# ハッシュにしてリファレンスを返す（Perlスクリプト向け）
+# CMakeLists.txt からプロジェクト名とバージョンを取得
+# （cmake実行前でも使用可能）
+sub get_proj_name_and_ver( $ )
+{
+    my( $cmakeliststxt ) = @_;
+
+    my %proj = (
+        name => '',
+        ver  => '' );
+
+    open( CMAKELISTS, '<', $cmakeliststxt ) ||
+        die( qq{$cmakeliststxt: could not open file: $!} );
+    while( my $line = <CMAKELISTS> ){
+        $line =~ s/\r?\n$//go;
+        #print( qq{L: $line\n} );
+
+        if( $line =~ m/project\s*\(\s*([^\s][^\)]+)\s*\)/o ){
+            #print( qq{"$1"\n} );
+            ## "get_shebang VERSION 0.0.1 LANGUAGES C"
+            my( $project_name, @fields ) = split( /\s+/, $1 );
+            $proj{ name } = $project_name;
+            my $version_found = 0;
+            for my $f( @fields ){
+                #print( qq{F: $f\n} );
+                if( $version_found ){
+                    $version_found = 0;
+                    $proj{ ver } = $f;
+                    last;
+                }elsif( lc( $f ) eq 'version' ){
+                    $version_found = 1;
+                    next;
+                }
+            }
+            last;
+        }
+    }
+    close( CMAKELISTS );
+    return \%proj;
 }
 
 # 実行して中身をini形式でダンプ（シェルスクリプト向け）

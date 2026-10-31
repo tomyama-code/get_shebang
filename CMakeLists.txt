@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(get_shebang VERSION 0.0.12 LANGUAGES C)
+project(get_shebang VERSION 0.0.13 LANGUAGES C)
 
 # 依存オプション用のモジュールを読み込む
 include(CMakeDependentOption)
@@ -27,6 +27,7 @@ endif()
 if(IS_MSVC)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 endif()
 
 # Coverageを有効にする条件分岐（例：COVERAGEオプションを定義）

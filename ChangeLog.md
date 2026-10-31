@@ -4,8 +4,15 @@
 ### Added
 - xxx
 ### Changed
-- MSVC, _CRT_SECURE_NO_WARNINGS
+- xxx
 
+
+## [0.0.13] - 2026-11-01
+### Changed
+- Configured the MSVC environment to use `_CRT_SECURE_NO_WARNINGS`.
+- Relaxed the requirement to use secure functions. Stopped using `fopen_s()`.
+  - `src/get_shebang.c`
+- Updated the various procedure scripts located in the `build` directory.
 
 ## [0.0.12] - 2026-10-31
 ### Changed

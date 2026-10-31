@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 ################################################################################
-## - $Revision: 1.15 $
+## - $Revision: 1.16 $
 ################################################################################
 
 use strict;                         # first released with perl 5
@@ -26,37 +26,11 @@ sub pl_main( @ )
 
     chdir( "$main::apppath/.." );
 
-    open( CMAKELISTS, '<', 'CMakeLists.txt' ) ||
-        die( qq{'CMakeLists.txt': could not open file: $!} );
-    my $proj_name = '';
-    my $proj_ver  = '';
-    while( my $line = <CMAKELISTS> ){
-        $line =~ s/\r?\n$//go;
-        #print( qq{L: $line\n} );
+    require "$main::apppath/parse_config_h.pl";
+    my $ref_proj = parse_config_h::get_proj_name_and_ver( "$main::apppath/../CMakeLists.txt" );
 
-        if( $line =~ m/project\s*\(\s*([^\s][^\)]+)\s*\)/o ){
-            #print( qq{"$1"\n} );
-            ## "get_shebang VERSION 0.0.1 LANGUAGES C"
-            my( $project_name, @fields ) = split( /\s+/, $1 );
-            $proj_name = $project_name;
-            my $version_found = 0;
-            for my $f( @fields ){
-                #print( qq{F: $f\n} );
-                if( $version_found ){
-                    $version_found = 0;
-                    $proj_ver = $f;
-                    last;
-                }elsif( lc( $f ) eq 'version' ){
-                    $version_found = 1;
-                    next;
-                }
-            }
-            last;
-        }
-    }
-    close( CMAKELISTS );
-    my $archive_file_name = "${proj_name}";
-    $archive_file_name .= "-$proj_ver" if( $proj_ver ne '' );
+    my $archive_file_name = "${ $ref_proj }{ name }";
+    $archive_file_name .= "-${ $ref_proj }{ ver }" if( ${ $ref_proj }{ ver } ne '' );
     $archive_file_name .= ".tar.gz";
     print( qq{\$archive_file_name="$archive_file_name"\n} );
 
@@ -77,7 +51,7 @@ sub pl_main( @ )
             die( qq{error: FileList.txt: $nr: $line: File not found.\n} );
         }
 
-        push( @file_list, "$proj_name/$line" );
+        push( @file_list, "${ $ref_proj }{ name }/$line" );
     }
     close( FILELILST );
 

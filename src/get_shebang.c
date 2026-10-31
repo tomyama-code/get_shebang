@@ -8,8 +8,8 @@
  *     - 改行コードは LF
  *
  * \author   tomyama  2026
- * \version  $Revision: 1.10 $
- * \date     $Date: 2026-10-31 04:37:35+09 $
+ * \version  $Revision: 1.12 $
+ * \date     $Date: 2026-10-31 14:34:32+09 $
  *
  * \example test/testcase_shebang_function.c
  ********************************************************************/
@@ -21,6 +21,7 @@
 #include <stdlib.h>         /* malloc(),free() */
 #ifdef EE_PLUGIN_DEV
  #ifdef _DEBUG
+  #include <windows.h>      /* OutputDebugStringA() */
   #include <stdarg.h>
  #endif
 #endif
@@ -472,24 +473,13 @@ static size_t _read_first_line( const char *const pFilename, char *const pBuff, 
     unsigned int     idx;
     size_t  first_line_sz;
 
-#ifdef HAVE_FOPEN_S
- #ifdef EE_PLUGIN_DEV
-    errno_t err = _wfopen_s( &pfi, pFilename, L"r" );
- #else  /* EE_PLUGIN_DEV */
-    errno_t err = fopen_s( &pfi, pFilename, "r" );
- #endif /* EE_PLUGIN_DEV */
-    if( err != 0 ){
-#else   /* HAVE_FOPEN_S */
+#ifdef EE_PLUGIN_DEV
+    pfi = _wfopen( pFilename, L"r" );
+#else   /* EE_PLUGIN_DEV */
     pfi = fopen( pFilename, "r" );
+#endif  /* EE_PLUGIN_DEV */
     if( pfi == NULL ){
-#endif  /* HAVE_FOPEN_S */
-
-#ifdef HAVE_STRERROR_S
-        char msgbuf[ 1024 ];
-        ( void )strerror_s( msgbuf, sizeof msgbuf, err );
-#else  /* HAVE_STRERROR_S */
         char *msgbuf = strerror( errno );
-#endif /* HAVE_STRERROR_S */
         err_printf( "%s: %s: <%d>%s\n",
             __FUNCTION__, pFilename, errno, msgbuf );
         return 0;
